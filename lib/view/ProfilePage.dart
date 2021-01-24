@@ -25,7 +25,7 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfile extends State<EditProfile> {
   ProfileBodyEnum profileBodyType;
-  bool showAppBar = true;
+  bool showAppBar;
 
   _EditProfile({this.profileBodyType, this.showAppBar});
 

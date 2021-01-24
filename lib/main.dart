@@ -1,3 +1,4 @@
+import 'package:cricscore/Constants.dart';
 import 'package:cricscore/view/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,7 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
     title: title,
-    theme: ThemeData(primarySwatch: Colors.deepOrange),
-    home: HomePage(),
+    theme: ThemeData(
+      primaryColor: Color(Constant.PRIMARY_THEME_COLOR),
+    ),
+    home: HomeController(),
   );
 }

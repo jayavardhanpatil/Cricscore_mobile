@@ -1,13 +1,15 @@
 import 'package:cricscore/controller/GoogleSignIn.dart';
+import 'package:cricscore/view/HomeView.dart';
 import 'package:cricscore/view/ProfilePage.dart';
 import 'package:cricscore/widget/BackGroundPaintWidget.dart';
+import 'package:cricscore/widget/Loader.dart';
 import 'package:cricscore/widget/LoggedInWidget.dart';
 import 'package:cricscore/widget/SignUpWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomeController extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: ChangeNotifierProvider(
@@ -16,12 +18,12 @@ class HomePage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           final provider = Provider.of<GoogleSignInProvider>(context);
-
           if (provider.isSigningIn) {
-            return buildLoading();
+            return Loading();
           } else if (snapshot.hasData) {
-            return EditProfile(profileBodyType: ProfileBodyEnum.view, showAppBar: true,);
-            //LoggedInWidget();
+            return HomeView();
+            //return EditProfile(profileBodyType: ProfileBodyEnum.view, showAppBar: true,);
+            //return LoggedInWidget();
           } else {
             return SignUpWidget();
           }
@@ -29,12 +31,5 @@ class HomePage extends StatelessWidget {
       ),
     ),
   );
-
-  Widget buildLoading() => Stack(
-    fit: StackFit.expand,
-    children: [
-      CustomPaint(painter: BackgroundPainter()),
-      Center(child: CircularProgressIndicator()),
-    ],
-  );
 }
+
