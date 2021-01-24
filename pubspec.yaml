@@ -1,5 +1,5 @@
 name: cricscore
-description: A new Flutter application.
+description: A Cricket score Card application
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -29,11 +29,40 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.1
 
+  # google sign in
+  firebase_auth: ^0.18.3
+  google_sign_in: ^4.5.6
+
+  intl: 0.16.1
+    #date_range_picker: ^1.0.3
+  auto_size_text: ^2.1.0
+  flutter_spinkit: ^4.1.2
+
+  # state management
+  provider: ^4.3.2+2
+
+  # Json json_serializable
+  json_annotation: ^3.1.1
+
+  # icon of google
+  font_awesome_flutter: ^8.10.0
+
+  # Sharaed Pref
+  shared_preferences: ^0.5.12+4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
+
+  build_runner: ^1.8.0
+  json_serializable: ^3.3.0
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "lib/assets/images/logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,3 +105,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+
+  assets:
+    - lib/assets/images/default_profile_avatar.png
+    - lib/assets/images/batting.png
+    - lib/assets/images/cricket_ball.png
