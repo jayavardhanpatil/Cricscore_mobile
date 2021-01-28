@@ -47,8 +47,14 @@ dependencies:
   # icon of google
   font_awesome_flutter: ^8.10.0
 
-  # Sharaed Pref
+  # Shared Pref
   shared_preferences: ^0.5.12+4
+
+  # Calender Picker
+  datetime_picker_formfield: ^1.0.0
+
+  #Type ahead
+  flutter_typeahead: ^1.8.0
 
 dev_dependencies:
   flutter_test:
