@@ -3,13 +3,11 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 final primaryColor = const Color(0xFF75A2EA);
@@ -28,7 +26,7 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfile extends State<EditProfile> {
   ProfileBodyEnum profileBodyType;
-  bool showAppBar = false;
+  bool showAppBar;
 
   _EditProfile({this.profileBodyType, this.showAppBar});
 
@@ -37,7 +35,6 @@ class _EditProfile extends State<EditProfile> {
   bool loading = false;
   TextEditingController _phoneNumber, _name, _city, _dob, _typeAheadController;
   final DateFormat format = DateFormat('yyyy-MM-dd');
-
   var _height;
 
   @override
@@ -48,6 +45,7 @@ class _EditProfile extends State<EditProfile> {
     _name = TextEditingController(text: playerProfile.first_name);
     _city = TextEditingController(text: playerProfile.city);
     _typeAheadController = TextEditingController(text: playerProfile.city);
+    _dob = TextEditingController(text: playerProfile.dateOfBirth);
     super.initState();
   }
 
@@ -264,7 +262,7 @@ class _EditProfile extends State<EditProfile> {
         controller: _dob,
         onChanged: (value) {
           setState(() {
-            _dob.text = format.format(value);
+            this._dob.text = format.format(value);
           });
         },
       ),
