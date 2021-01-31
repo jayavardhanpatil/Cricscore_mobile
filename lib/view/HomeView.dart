@@ -20,8 +20,8 @@ final grayColor = const Color(0xFF939393);
 
 class _HomeView extends State<HomeView> with TickerProviderStateMixin{
 
-  final List<MyTabs> _tabs = [new MyTabs(title: "Matches in your city",color: Colors.teal[200]),
-    new MyTabs(title: "Profile",color: Colors.orange[200]),
+  final List<MyTabs> _tabs = [new MyTabs(title: "Matches in your city"),
+    new MyTabs(title: "Profile"),
   ];
 
   MyTabs _myHandler ;

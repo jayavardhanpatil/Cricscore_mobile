@@ -12,7 +12,7 @@ Future main() async {
 }
 
 class MyApp extends StatelessWidget {
-  static final String title = 'Welcome!, Sign In to create Plyer profile!';
+  static final String title = 'Welcome!, Sign In to create Player profile!';
 
   @override
   Widget build(BuildContext context) => MaterialApp(

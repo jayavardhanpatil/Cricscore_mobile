@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final primaryColor = const Color(0xFF75A2EA);
 enum ProfileBodyEnum { view, edit }
@@ -34,7 +35,7 @@ class _EditProfile extends State<EditProfile> {
 
   bool loading = false;
   TextEditingController _phoneNumber, _name, _city, _dob, _typeAheadController;
-  final DateFormat format = DateFormat('yyyy-MM-dd');
+  final DateFormat format = DateFormat('yyyy-MMM-dd');
   var _height;
 
   @override
@@ -117,8 +118,18 @@ class _EditProfile extends State<EditProfile> {
                   ),
                 ),
                 onPressed: () {
-
-
+                  print(_city.text);
+                  print(_name.text);
+                  print(_phoneNumber.text);
+                  print(_dob.text);
+                  playerProfile.city = _city.text;
+                  playerProfile.dateOfBirth = _dob.text;
+                  playerProfile.phoneNumber = int.parse(_phoneNumber.text);
+                  SharedPrefUtil.putObject(Constant.PROFILE_KEY, playerProfile);
+                  setState(() {
+                    //profileBodyType = ProfileBodyEnum.view;
+                    playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
+                  });
                 },
               )
 
@@ -148,7 +159,7 @@ class _EditProfile extends State<EditProfile> {
                 padding: const EdgeInsets.all(10.0),
                 child: Form(
                   child: Column(
-                    children: _EditProfile().buildInputs(context, false),
+                    children: buildInputs(context, false),
                   ),
                 ),
               ),
