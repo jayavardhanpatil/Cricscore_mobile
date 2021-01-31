@@ -100,7 +100,7 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
                   ),
                 ),
                 currentAccountPicture : new CircleAvatar(
-                  backgroundImage: new ExactAssetImage('lib/assets/images/default_profile_avatar.png'),
+                  backgroundImage: new NetworkImage((profile.photoUrl == null) ? 'lib/assets/images/default_profile_avatar.png' : profile.photoUrl),
                   backgroundColor: Colors.white,
                 ),
               ),

@@ -81,8 +81,9 @@ class _EditProfile extends State<EditProfile> {
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: CircleAvatar(
-                  backgroundImage: ExactAssetImage(
-                      "lib/assets/images/default_profile_avatar.png"),
+                  backgroundImage: NetworkImage(
+                      (playerProfile.photoUrl == null) ?
+                      "lib/assets/images/default_profile_avatar.png" : playerProfile.photoUrl),
                   backgroundColor: Colors.transparent,
                   minRadius: 30,
                   maxRadius: 60,
@@ -148,8 +149,9 @@ class _EditProfile extends State<EditProfile> {
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: CircleAvatar(
-                  backgroundImage: ExactAssetImage(
-                      "lib/assets/images/default_profile_avatar.png"),
+                  backgroundImage: NetworkImage(
+                      (playerProfile.photoUrl == null) ?
+                      "lib/assets/images/default_profile_avatar.png" : playerProfile.photoUrl),
                   backgroundColor: Colors.transparent,
                   minRadius: 30,
                   maxRadius: 60,
