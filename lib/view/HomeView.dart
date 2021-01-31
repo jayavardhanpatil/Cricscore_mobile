@@ -21,7 +21,7 @@ final grayColor = const Color(0xFF939393);
 class _HomeView extends State<HomeView> with TickerProviderStateMixin{
 
   final List<MyTabs> _tabs = [new MyTabs(title: "Matches in your city"),
-    new MyTabs(title: "Profile"),
+    new MyTabs(title: Constant.PROFILE_APP_BAR_TITLE),
   ];
 
   MyTabs _myHandler ;
@@ -78,7 +78,7 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
           children: <Widget>[
 
             Container(
-              color: Color(0xFF6190E8),
+              color : Constant.PRIMARY_COLOR,
               child: new UserAccountsDrawerHeader(
                 accountName: ((profile.first_name) != null) ? AutoSizeText(
                   profile.first_name,

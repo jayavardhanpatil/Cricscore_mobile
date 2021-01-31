@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final primaryColor = const Color(0xFF75A2EA);
 enum ProfileBodyEnum { view, edit }
@@ -36,6 +35,7 @@ class _EditProfile extends State<EditProfile> {
   bool loading = false;
   TextEditingController _phoneNumber, _name, _city, _dob, _typeAheadController;
   final DateFormat format = DateFormat('yyyy-MMM-dd');
+  String appBarTitle = Constant.PROFILE_APP_BAR_TITLE;
   var _height;
 
   @override
@@ -61,7 +61,8 @@ class _EditProfile extends State<EditProfile> {
     return Scaffold(
       appBar: showAppBar ? new AppBar(
         title: AutoSizeText(
-          Constant.EDIT_PROFILE_APP_BAR_TITLE,
+          //Constant.EDIT_PROFILE_APP_BAR_TITLE,
+          appBarTitle,
           maxLines: 1,
           textAlign: TextAlign.start,
           style: TextStyle(
@@ -128,7 +129,8 @@ class _EditProfile extends State<EditProfile> {
                   playerProfile.phoneNumber = int.parse(_phoneNumber.text);
                   SharedPrefUtil.putObject(Constant.PROFILE_KEY, playerProfile);
                   setState(() {
-                    //profileBodyType = ProfileBodyEnum.view;
+                    profileBodyType = ProfileBodyEnum.view;
+                    appBarTitle = Constant.PROFILE_APP_BAR_TITLE;
                     playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
                   });
                 },
@@ -189,6 +191,7 @@ class _EditProfile extends State<EditProfile> {
                 onPressed: () {
                   setState(() {
                     profileBodyType = ProfileBodyEnum.edit;
+                    appBarTitle = Constant.EDIT_PROFILE_APP_BAR_TITLE;
                   });
                 },
               ),
