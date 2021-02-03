@@ -1,14 +1,20 @@
 
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
 import 'package:cricscore/model/player.dart';
+import 'package:cricscore/widget/Tost.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
 
 final primaryColor = const Color(0xFF75A2EA);
 enum ProfileBodyEnum { view, edit }
@@ -34,7 +40,7 @@ class _EditProfile extends State<EditProfile> {
 
   bool loading = false;
   TextEditingController _phoneNumber, _name, _city, _dob, _typeAheadController;
-  final DateFormat format = DateFormat('yyyy-MMM-dd');
+  final DateFormat format = DateFormat('yyyy-MM-dd');
   String appBarTitle = Constant.PROFILE_APP_BAR_TITLE;
   var _height;
 
@@ -120,10 +126,7 @@ class _EditProfile extends State<EditProfile> {
                   ),
                 ),
                 onPressed: () {
-                  print(_city.text);
-                  print(_name.text);
-                  print(_phoneNumber.text);
-                  print(_dob.text);
+
                   playerProfile.city = _city.text;
                   playerProfile.dateOfBirth = _dob.text;
                   playerProfile.phoneNumber = int.parse(_phoneNumber.text);
@@ -133,6 +136,21 @@ class _EditProfile extends State<EditProfile> {
                     appBarTitle = Constant.PROFILE_APP_BAR_TITLE;
                     playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
                   });
+
+                  http.post(Constant.PROFILE_URL+"/players/add",
+                      headers: <String, String>{
+                        'Content-Type': 'application/json; charset=UTF-8',
+                      },
+                      body: jsonEncode(playerProfile.toJson()))
+                      .then((value) => {
+                      print(value.body),
+                      if(value.statusCode == 200)
+                        showSuccessColoredToast("Profile added")
+                      else
+                        showFailedColoredToast("Failed to add Profile")
+                    //_showSuccessColoredToast("Profile Added to server")
+                    }
+                  );
                 },
               )
 
@@ -310,6 +328,14 @@ class _EditProfile extends State<EditProfile> {
 
 }
 
+void _showSuccessColoredToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    backgroundColor: Color.fromRGBO(44, 213, 83, 0.4),
+    textColor: Colors.black87,
+    gravity: ToastGravity.BOTTOM,
+  );
+}
 
 List<String> cities = ["Mumbai", "Pune", "Bhoj", "Bangalore", "Delhi"];
 

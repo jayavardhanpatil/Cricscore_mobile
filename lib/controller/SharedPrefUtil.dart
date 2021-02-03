@@ -149,4 +149,8 @@ class SharedPrefUtil{
   static bool isInitialized() {
     return _preferences != null;
   }
+
+  static Player getProfile(String uuid){
+    return getPlayerObject(uuid);
+  }
 }
