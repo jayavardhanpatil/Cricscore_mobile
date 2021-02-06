@@ -10,7 +10,9 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
   return Player()
     ..uuid = json['uuid'] as String
     ..first_name = json['first_name'] as String
-    ..city = json['city'] as String
+    ..city = json['city'] == null
+        ? null
+        : City.fromJson(json['city'] as Map<String, dynamic>)
     ..phoneNumber = json['phoneNumber'] as int
     ..dateOfBirth = json['dateOfBirth'] as String
     ..email = json['email'] as String
@@ -20,7 +22,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'uuid': instance.uuid,
       'first_name': instance.first_name,
-      'city': instance.city,
+      'city': instance.city?.toJson(),
       'phoneNumber': instance.phoneNumber,
       'dateOfBirth': instance.dateOfBirth,
       'email': instance.email,

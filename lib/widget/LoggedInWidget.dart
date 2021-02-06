@@ -23,9 +23,7 @@ class LoggedInWidget extends StatelessWidget {
        ..email = user.email
        ..photoUrl = user.photoURL;
 
-    if(!SharedPrefUtil.haveKey(Constant.PROFILE_KEY)) {
-      SharedPrefUtil.putObject(Constant.PROFILE_KEY, player);
-    }
+    SharedPrefUtil.putObject(Constant.PROFILE_KEY, player);
 
     print(SharedPrefUtil.getObject(Constant.PROFILE_KEY));
 

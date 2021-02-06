@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:cricscore/model/player.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Constants.dart';
 
 class SharedPrefUtil{
   static final SharedPrefUtil _instance = SharedPrefUtil._();
@@ -33,14 +36,30 @@ class SharedPrefUtil{
   // get object
   static Map getObject(String key) {
     if (_preferences == null) return null;
-    String _data = _preferences.getString(key);
+      String _data = _preferences.getString(key);
     return (_data == null || _data.isEmpty) ? null : json.decode(_data);
   }
 
   // get object
   static Player getPlayerObject(String key) {
     if (_preferences == null) return null;
-    return Player.fromJson(getObject(key));
+
+      if(haveKey(key))
+        return Player.fromJson(getObject(key));
+      else{
+        final user = FirebaseAuth.instance.currentUser;
+
+        Player player = new Player()
+          ..first_name = user.displayName
+          ..uuid = user.uid
+          ..email = user.email
+          ..photoUrl = user.photoURL;
+
+        putObject(Constant.PROFILE_KEY, player);
+        print(SharedPrefUtil.getObject(Constant.PROFILE_KEY));
+
+        return Player.fromJson(getObject(key));
+      }
   }
 
   // put object list
@@ -152,5 +171,13 @@ class SharedPrefUtil{
 
   static Player getProfile(String uuid){
     return getPlayerObject(uuid);
+  }
+
+  static List<String> getCities(){
+    return _preferences.getStringList("cities");
+  }
+
+  static void addUpdate(List<String> citiesList){
+    _preferences.setStringList("cities", citiesList);
   }
 }

@@ -1,16 +1,18 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'City.dart';
+
 part 'player.g.dart';
 
 
 //https://flutter.dev/docs/development/data-and-backend/json
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Player{
   String uuid;
   String first_name;
-  String city;
+  City city;
   int phoneNumber;
   String dateOfBirth;
   String email;
@@ -22,8 +24,4 @@ class Player{
 
   Map<String, dynamic> toJson() => _$PlayerToJson(this);
 
-  @override
-  String toString() {
-    return 'Player{uuid: $uuid, first_name: $first_name, city: $city, phoneNumber: $phoneNumber, dateOfBirth: $dateOfBirth, email: $email, photoUrl: $photoUrl}';
-  }
 }

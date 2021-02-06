@@ -1,6 +1,8 @@
 import 'package:cricscore/controller/GoogleSignIn.dart';
+import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/view/HomeView.dart';
 import 'package:cricscore/widget/Loader.dart';
+import 'package:cricscore/widget/LoggedInWidget.dart';
 import 'package:cricscore/widget/SignUpWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ class HomeController extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           final provider = Provider.of<GoogleSignInProvider>(context);
+          //return SignUpWidget();
           if (provider.isSigningIn) {
             return Loading();
           } else if (snapshot.hasData) {

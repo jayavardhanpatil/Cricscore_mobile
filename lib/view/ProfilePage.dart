@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/widget/Tost.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
@@ -11,12 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-
-final primaryColor = const Color(0xFF75A2EA);
 enum ProfileBodyEnum { view, edit }
 
 class EditProfile extends StatefulWidget {
@@ -43,15 +41,15 @@ class _EditProfile extends State<EditProfile> {
   final DateFormat format = DateFormat('yyyy-MM-dd');
   String appBarTitle = Constant.PROFILE_APP_BAR_TITLE;
   var _height;
-
+  City _selectedCity;
   @override
   initState(){
     playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
     print("Profile : "+ playerProfile.toString());
-    _phoneNumber = TextEditingController(text: playerProfile.phoneNumber.toString());
+    _phoneNumber = TextEditingController(text: (playerProfile.phoneNumber == null) ? '' : playerProfile.phoneNumber.toString());
     _name = TextEditingController(text: playerProfile.first_name);
-    _city = TextEditingController(text: playerProfile.city);
-    _typeAheadController = TextEditingController(text: playerProfile.city);
+    _city = TextEditingController(text: (playerProfile.city == null) ? null : playerProfile.city.cityName);
+    _typeAheadController = TextEditingController(text: (playerProfile.city == null) ? null : playerProfile.city.cityName);
     _dob = TextEditingController(text: playerProfile.dateOfBirth);
     super.initState();
   }
@@ -100,7 +98,7 @@ class _EditProfile extends State<EditProfile> {
                 padding: const EdgeInsets.all(10.0),
                 child: Form(
                   child: Column(
-                    children: buildInputs(context, editable),
+                    children: _buildInputs(context, editable),
                   ),
                 ),
               ),
@@ -109,7 +107,7 @@ class _EditProfile extends State<EditProfile> {
               SizedBox(height: _height * 0.05,),
 
               RaisedButton(
-                color: primaryColor,
+                color: Constant.PRIMARY_COLOR,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0)),
                 child: Padding(
@@ -126,10 +124,10 @@ class _EditProfile extends State<EditProfile> {
                   ),
                 ),
                 onPressed: () {
-
-                  playerProfile.city = _city.text;
+                  playerProfile.city = _selectedCity;
                   playerProfile.dateOfBirth = _dob.text;
                   playerProfile.phoneNumber = int.parse(_phoneNumber.text);
+
                   SharedPrefUtil.putObject(Constant.PROFILE_KEY, playerProfile);
                   setState(() {
                     profileBodyType = ProfileBodyEnum.view;
@@ -137,13 +135,15 @@ class _EditProfile extends State<EditProfile> {
                     playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
                   });
 
-                  http.post(Constant.PROFILE_URL+"/players/add",
+                  print(playerProfile.toJson());
+
+                  http.post(Constant.PROFILE_SERVICE_URL+"/players/add",
                       headers: <String, String>{
                         'Content-Type': 'application/json; charset=UTF-8',
                       },
                       body: jsonEncode(playerProfile.toJson()))
                       .then((value) => {
-                      print(value.body),
+                      //print(value.body),
                       if(value.statusCode == 200)
                         showSuccessColoredToast("Profile added")
                       else
@@ -181,7 +181,7 @@ class _EditProfile extends State<EditProfile> {
                 padding: const EdgeInsets.all(10.0),
                 child: Form(
                   child: Column(
-                    children: buildInputs(context, false),
+                    children: _buildInputs(context, false),
                   ),
                 ),
               ),
@@ -190,7 +190,7 @@ class _EditProfile extends State<EditProfile> {
 
 
               RaisedButton(
-                color: primaryColor,
+                color: Constant.PRIMARY_COLOR,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0)),
                 child: Padding(
@@ -220,7 +220,7 @@ class _EditProfile extends State<EditProfile> {
     );
   }
 
-  List<Widget> buildInputs(BuildContext context, bool enabled) {
+  List<Widget> _buildInputs(BuildContext context, bool enabled) {
     List<Widget> textFields = [];
     textFields.add(
       TextField(
@@ -252,8 +252,14 @@ class _EditProfile extends State<EditProfile> {
         ),
         suggestionsCallback: (pattern) {
           List filtteredCities = [];
-          for(String city in cities){
-            if(city.toLowerCase().startsWith(pattern.toLowerCase())){
+          // for(String city in cities){
+          //   if(city.toLowerCase().startsWith(pattern.toLowerCase())){
+          //     filtteredCities.add(city);
+          //   }
+          //   if(filtteredCities.length == 3) break;
+          // }
+          for(City city in cities1){
+            if(city.cityName.toLowerCase().startsWith(pattern.toLowerCase())){
               filtteredCities.add(city);
             }
             if(filtteredCities.length == 3) break;
@@ -263,15 +269,17 @@ class _EditProfile extends State<EditProfile> {
         itemBuilder: (context, suggestion) {
           return ListTile(
             leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
-            title: Text(suggestion, style: TextStyle(fontFamily: "Lemonada",),),
+            title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
           );
         },
         transitionBuilder: (context, suggestionsBox, controller) {
           return suggestionsBox;
         },
         onSuggestionSelected: (suggestion) {
-          this._city.text = suggestion;
-          this._typeAheadController.text = suggestion;
+          _selectedCity = suggestion;
+          playerProfile.city = suggestion as City;
+          this._city.text = suggestion.cityName;
+          this._typeAheadController.text = suggestion.cityName;
         },
       ),
     );
@@ -328,14 +336,6 @@ class _EditProfile extends State<EditProfile> {
 
 }
 
-void _showSuccessColoredToast(String message) {
-  Fluttertoast.showToast(
-    msg: message,
-    backgroundColor: Color.fromRGBO(44, 213, 83, 0.4),
-    textColor: Colors.black87,
-    gravity: ToastGravity.BOTTOM,
-  );
-}
-
 List<String> cities = ["Mumbai", "Pune", "Bhoj", "Bangalore", "Delhi"];
+List<City> cities1 = [City(1, 'Mumbai', 'MH'), City(2, 'Bangalore', 'KA'), City(3, 'Bhoj', 'KA')];
 
