@@ -3,10 +3,7 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
-import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
-import 'package:cricscore/model/City.dart';
-import 'package:cricscore/model/Team.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -188,8 +185,9 @@ class _teamSelect extends State<TeamSelect>{
                     setState(() {
                       _isNoItemFound = false;
                     });
-                    List<City> citi = HttpUtil().getCities();
+                    var city = SharedPrefUtil.getCities();
                     //cities.add(_typeAheadTeamController.text);
+                    print("Into the select Team");
                   },
                 ) : null,
               )
@@ -205,7 +203,7 @@ class _teamSelect extends State<TeamSelect>{
 
           Container(
             child: DefaultTabController(
-                length: 2, // length of tabs
+                length: 3, // length of tabs
                 initialIndex: 0,
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
 
@@ -218,8 +216,9 @@ class _teamSelect extends State<TeamSelect>{
                           borderRadius: BorderRadius.circular(5),
                           color: Constant.PRIMARY_COLOR),
                       tabs: [
-                        Tab(text: 'Squad'),
-                        Tab(text: 'Add players'),
+                        Tab(text: 'Playing Squad'),
+                        Tab(text: 'Team Squad'),
+                        Tab(text: 'Add Player'),
                       ],
                     ),
                   ),
@@ -256,6 +255,11 @@ class _teamSelect extends State<TeamSelect>{
                         Container(
                           child: Center(
                             child: Text('Please select players from the grid', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        Container(
+                          child: Center(
+                            child: Text('Please search players from the grid', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ])

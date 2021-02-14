@@ -47,8 +47,8 @@ class _EditProfile extends State<EditProfile> {
     playerProfile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
     print("Profile : "+ playerProfile.toString());
     _phoneNumber = TextEditingController(text: (playerProfile.phoneNumber == null) ? '' : playerProfile.phoneNumber.toString());
-    _name = TextEditingController(text: playerProfile.first_name);
-    _city = TextEditingController(text: (playerProfile.city == null) ? null : playerProfile.city.cityName);
+    _name = TextEditingController(text: playerProfile.name);
+    _city = TextEditingController(text: (playerProfile.city == null) ? null : playerProfile.city.cityName + ",  "+ playerProfile.city.state);
     _typeAheadController = TextEditingController(text: (playerProfile.city == null) ? null : playerProfile.city.cityName);
     _dob = TextEditingController(text: playerProfile.dateOfBirth);
     super.initState();
@@ -239,8 +239,15 @@ class _EditProfile extends State<EditProfile> {
     textFields.add(
       TypeAheadFormField(
         direction: AxisDirection.up,
-        suggestionsBoxVerticalOffset: -10.0,
+        suggestionsBoxVerticalOffset: 5.0,
+        getImmediateSuggestions: false,
+        //loadingBuilder: ,
+        // suggestionsBoxDecoration: SuggestionsBoxDecoration(
+        //   hasScrollbar: true,
+        //
+        // ),
         autoFlipDirection: true,
+        hideOnError: true,
         textFieldConfiguration: TextFieldConfiguration(
             controller: this._typeAheadController,
             enabled: enabled,
@@ -251,20 +258,18 @@ class _EditProfile extends State<EditProfile> {
             style: TextStyle(fontFamily: "Lemonada",)
         ),
         suggestionsCallback: (pattern) {
-          List filtteredCities = [];
-          // for(String city in cities){
-          //   if(city.toLowerCase().startsWith(pattern.toLowerCase())){
-          //     filtteredCities.add(city);
-          //   }
-          //   if(filtteredCities.length == 3) break;
-          // }
-          for(City city in cities1){
-            if(city.cityName.toLowerCase().startsWith(pattern.toLowerCase())){
-              filtteredCities.add(city);
+          List filteredCities = [];
+          for(City city in SharedPrefUtil.getCities()){
+            print(city.toJson());
+            if(city.cityName != null) {
+              if (city.cityName.toLowerCase().startsWith(
+                  pattern.toLowerCase())) {
+                filteredCities.add(city);
+              }
             }
-            if(filtteredCities.length == 3) break;
+            if(filteredCities.length == 10) break;
           }
-          return filtteredCities;
+          return filteredCities;
         },
         itemBuilder: (context, suggestion) {
           return ListTile(
@@ -278,8 +283,8 @@ class _EditProfile extends State<EditProfile> {
         onSuggestionSelected: (suggestion) {
           _selectedCity = suggestion;
           playerProfile.city = suggestion as City;
-          this._city.text = suggestion.cityName;
-          this._typeAheadController.text = suggestion.cityName;
+          this._city.text = suggestion.cityName + ", " + suggestion.state;
+          this._typeAheadController.text = suggestion.cityName + ", " + suggestion.state;
         },
       ),
     );
@@ -336,6 +341,6 @@ class _EditProfile extends State<EditProfile> {
 
 }
 
-List<String> cities = ["Mumbai", "Pune", "Bhoj", "Bangalore", "Delhi"];
-List<City> cities1 = [City(1, 'Mumbai', 'MH'), City(2, 'Bangalore', 'KA'), City(3, 'Bhoj', 'KA')];
+//List<String> cities = ["Mumbai", "Pune", "Bhoj", "Bangalore", "Delhi"];
+//List<City> cities1 = [City(1, 'Mumbai', 'MH'), City(2, 'Bangalore', 'KA'), City(3, 'Bhoj', 'KA')];
 

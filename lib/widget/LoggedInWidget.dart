@@ -18,7 +18,7 @@ class LoggedInWidget extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     Player player = new Player()
-       ..first_name = user.displayName
+       ..name = user.displayName
        ..uuid = user.uid
        ..email = user.email
        ..photoUrl = user.photoURL;

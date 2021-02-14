@@ -40,4 +40,8 @@ class HttpUtil {
     return cities;
   }
 
+  // Future getCitiesFromServer() async{
+  //   return await
+  // }
+
 }

@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:cricscore/controller/HTTPUtil.dart';
+import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import '../Constants.dart';
 
@@ -50,7 +54,7 @@ class SharedPrefUtil{
         final user = FirebaseAuth.instance.currentUser;
 
         Player player = new Player()
-          ..first_name = user.displayName
+          ..name = user.displayName
           ..uuid = user.uid
           ..email = user.email
           ..photoUrl = user.photoURL;
@@ -173,9 +177,35 @@ class SharedPrefUtil{
     return getPlayerObject(uuid);
   }
 
-  static List<String> getCities(){
-    return _preferences.getStringList("cities");
+  static List<City> getCities(){
+    if(haveKey("cities")){
+      return getObjList("cities", (v) => City.fromJson(v));
+    }
+    return null;
   }
+
+  static Future<List<City>> fetchCities() async{
+    //else {
+    if(haveKey("cities")){
+        return json.decode(getString("cities"));
+      }else {
+        List<City> city = [];
+        final response = await http.get(
+            Constant.PROFILE_SERVICE_URL + "/cities", headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        });
+
+        if (response.statusCode == 200) {
+          Iterable l = json.decode(response.body);
+          city = List<City>.from(l.map((model) => City.fromJson(model)));
+          putObjectList("cities", city);
+        }
+        return city;
+      }
+    //}
+    //return cities;
+  }
+
 
   static void addUpdate(List<String> citiesList){
     _preferences.setStringList("cities", citiesList);

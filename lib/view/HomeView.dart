@@ -34,9 +34,9 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
   Player profile;
 
   void initState() {
-   // super.initState();
+    super.initState();
      profile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
-    _textEditingController.text = profile.first_name;
+    _textEditingController.text = profile.name;
     _controller = new TabController(length: 2, vsync: this);
     _myHandler = _tabs[0];
     _controller.addListener(_handleSelected);
@@ -83,8 +83,8 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
             Container(
               color : Constant.PRIMARY_COLOR,
               child: new UserAccountsDrawerHeader(
-                accountName: ((profile.first_name) != null) ? AutoSizeText(
-                  profile.first_name,
+                accountName: ((profile.name) != null) ? AutoSizeText(
+                  profile.name,
                   maxLines: 4,
                   textAlign: TextAlign.start,
                   style: TextStyle(

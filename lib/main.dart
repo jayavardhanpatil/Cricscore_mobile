@@ -8,6 +8,9 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await SharedPrefUtil().init();
+  SharedPrefUtil.remove("cities");
+//  SharedPrefUtil.clear();
+  await SharedPrefUtil.fetchCities();
   runApp(MyApp());
 }
 

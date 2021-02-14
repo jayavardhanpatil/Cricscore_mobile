@@ -11,7 +11,7 @@ part 'player.g.dart';
 @JsonSerializable(explicitToJson: true)
 class Player{
   String uuid;
-  String first_name;
+  String name;
   City city;
   int phoneNumber;
   String dateOfBirth;

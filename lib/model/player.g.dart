@@ -9,7 +9,7 @@ part of 'player.dart';
 Player _$PlayerFromJson(Map<String, dynamic> json) {
   return Player()
     ..uuid = json['uuid'] as String
-    ..first_name = json['first_name'] as String
+    ..name = json['name'] as String
     ..city = json['city'] == null
         ? null
         : City.fromJson(json['city'] as Map<String, dynamic>)
@@ -21,7 +21,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'uuid': instance.uuid,
-      'first_name': instance.first_name,
+      'name': instance.name,
       'city': instance.city?.toJson(),
       'phoneNumber': instance.phoneNumber,
       'dateOfBirth': instance.dateOfBirth,

@@ -1,5 +1,8 @@
 
+import 'package:cricscore/model/player.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'City.dart';
 
 part 'Team.g.dart';
 
@@ -8,8 +11,8 @@ class Team{
 
   int teamId;
   String teamName;
-  String city;
-  List players;
+  City city;
+  List<Player> players;
 
   Team(this.teamId, this.teamName, this.city, this.players);
 
