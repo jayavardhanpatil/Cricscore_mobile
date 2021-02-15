@@ -7,11 +7,10 @@ part of 'City.dart';
 // **************************************************************************
 
 City _$CityFromJson(Map<String, dynamic> json) {
-  return City(
-    json['cityId'] as int,
-    json['cityName'] as String,
-    json['state'] as String,
-  );
+  return City()
+    ..cityId = json['cityId'] as int
+    ..cityName = json['cityName'] as String
+    ..state = json['state'] as String;
 }
 
 Map<String, dynamic> _$CityToJson(City instance) => <String, dynamic>{

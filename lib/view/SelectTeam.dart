@@ -3,7 +3,10 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
+import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/Team.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -19,6 +22,8 @@ class _teamSelect extends State<TeamSelect>{
   String _selectTeamAppBarTitle = "Select Team A";
   TextEditingController _typeAheadTeamController;
   TextEditingController _typeAheadCityController;
+  Team _team;
+  City _city;
   var _height;
   var _width;
   initState(){
@@ -29,6 +34,8 @@ class _teamSelect extends State<TeamSelect>{
     }
     _typeAheadTeamController = new TextEditingController();
     _typeAheadCityController = new TextEditingController();
+    _team = Team();
+    _city = City();
   }
 
   @override
@@ -80,27 +87,23 @@ class _teamSelect extends State<TeamSelect>{
                 enabled: true,
                 decoration: InputDecoration(
                     labelText: 'select team',
+                    border: OutlineInputBorder()
                 ),
                 style: TextStyle(fontFamily: "Lemonada",),
               ),
-              suggestionsCallback: (pattern) {
-                List filtteredCities = [];
-                for(String city in cities){
-                  if(city.toLowerCase().startsWith(pattern.toLowerCase())){
-                    filtteredCities.add(city);
-                  }
-                  if(filtteredCities.length == 3) break;
-                }
+              suggestionsCallback: (pattern) async {
+                List filteredTeams = await getTeams(pattern);
                 setState(() {
-                  if(filtteredCities.isEmpty) _isNoItemFound = true;
+                  if(filteredTeams.isEmpty) _isNoItemFound = true;
                   else _isNoItemFound = false;
                 });
-                return filtteredCities;
+
+                return filteredTeams;
               },
               itemBuilder: (context, suggestion) {
                 return ListTile(
                   leading: Icon(Icons.sports_cricket_sharp, color: Constant.PRIMARY_COLOR,),
-                  title: Text(suggestion, style: TextStyle(fontFamily: "Lemonada",),),
+                  title: Text(suggestion.teamName, style: TextStyle(fontFamily: "Lemonada",),),
                 );
               },
               transitionBuilder: (context, suggestionsBox, controller) {
@@ -108,7 +111,8 @@ class _teamSelect extends State<TeamSelect>{
               },
               onSuggestionSelected: (suggestion) {
                 //this._city.text = suggestion;
-                this._typeAheadTeamController.text = suggestion;
+                this._team = suggestion as Team;
+                this._typeAheadTeamController.text = suggestion.teamName;
               },
             ),
 
@@ -134,21 +138,24 @@ class _teamSelect extends State<TeamSelect>{
                     ),
                     style: TextStyle(fontFamily: "Lemonada",),
                   ),
-                  suggestionsCallback: (pattern) {
-                    List filtteredCities = [];
-                    for(String city in cities){
-                      if(city.toLowerCase().startsWith(pattern.toLowerCase())){
-                        filtteredCities.add(city);
+                  suggestionsCallback: (pattern) async {
+                    List filteredCities = [];
+                    for(City city in await SharedPrefUtil.getCities()){
+                      print(city.toJson());
+                      if(city.cityName != null) {
+                        if (city.cityName.toLowerCase().startsWith(
+                            pattern.toLowerCase())) {
+                          filteredCities.add(city);
+                        }
                       }
-                      if(filtteredCities.length == 3) break;
+                      if(filteredCities.length == 10) break;
                     }
-
-                    return filtteredCities;
+                    return filteredCities;
                   },
                   itemBuilder: (context, suggestion) {
                     return ListTile(
                       leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
-                      title: Text(suggestion, style: TextStyle(fontFamily: "Lemonada",),),
+                      title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
                     );
                   },
                   transitionBuilder: (context, suggestionsBox, controller) {
@@ -156,7 +163,8 @@ class _teamSelect extends State<TeamSelect>{
                   },
                   onSuggestionSelected: (suggestion) {
                     //this._city.text = suggestion;
-                    this._typeAheadCityController.text = suggestion;
+                    this._city = suggestion as City;
+                    this._typeAheadCityController.text = suggestion.cityName + ", " + suggestion.state;
                   },
                 ),
               ),
@@ -185,9 +193,9 @@ class _teamSelect extends State<TeamSelect>{
                     setState(() {
                       _isNoItemFound = false;
                     });
-                    var city = SharedPrefUtil.getCities();
-                    //cities.add(_typeAheadTeamController.text);
-                    print("Into the select Team");
+
+                    this._team.city = this._city;
+                    HttpUtil.addteam(this._team);
                   },
                 ) : null,
               )
@@ -272,6 +280,19 @@ class _teamSelect extends State<TeamSelect>{
 
     );
   }
-}
 
-List<String> cities = ["Mumbai", "Pune", "Bhoj", "Bangalore", "Delhi"];
+  Future<List<Team>> getTeams(String pattern) async{
+    List<Team> filteredTeams = await HttpUtil.getTeams();
+    for(Team team in filteredTeams){
+      print(team.toJson());
+      if(team.teamName != null) {
+        if (team.teamName.toLowerCase().startsWith(
+            pattern.toLowerCase())) {
+          filteredTeams.add(team);
+        }
+      }
+      if(filteredTeams.length == 10) break;
+    }
+    return filteredTeams;
+  }
+}

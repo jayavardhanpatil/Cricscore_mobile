@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -177,35 +178,41 @@ class SharedPrefUtil{
     return getPlayerObject(uuid);
   }
 
-  static List<City> getCities(){
+  static Future<List<City>> getCities() async {
     if(haveKey("cities")){
       return getObjList("cities", (v) => City.fromJson(v));
     }
-    return null;
+    return fetchCities();
   }
 
   static Future<List<City>> fetchCities() async{
-    //else {
     if(haveKey("cities")){
-        return json.decode(getString("cities"));
-      }else {
-        List<City> city = [];
-        final response = await http.get(
-            Constant.PROFILE_SERVICE_URL + "/cities", headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        });
-
-        if (response.statusCode == 200) {
-          Iterable l = json.decode(response.body);
-          city = List<City>.from(l.map((model) => City.fromJson(model)));
-          putObjectList("cities", city);
-        }
-        return city;
-      }
-    //}
-    //return cities;
+      return json.decode(getString("cities"));
+    }else {
+      List<City> listOfcities = await HttpUtil.getCities();
+      await putObject("cities", listOfcities);
+      return listOfcities;
+    }
   }
 
+  static Future<List<Team>> getTeams() async{
+    print("into get Teams SharedFilter");
+    // if(haveKey("teams")){
+    //   return getObjList("teams", (v) => Team.fromJson(v));
+    // }
+     return fetchteams();
+  }
+
+  static Future<List<Team>> fetchteams() async{
+    if(haveKey("teams")){
+      return json.decode(getString("teams"));
+    }else {
+      List<Team> listOfteams = await HttpUtil.getTeams();
+      if(listOfteams.isNotEmpty)
+        await putObject("teams", listOfteams);
+      return listOfteams;
+    }
+  }
 
   static void addUpdate(List<String> citiesList){
     _preferences.setStringList("cities", citiesList);

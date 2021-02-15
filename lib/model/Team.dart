@@ -14,7 +14,7 @@ class Team{
   City city;
   List<Player> players;
 
-  Team(this.teamId, this.teamName, this.city, this.players);
+  Team();
 
   /// A necessary factory constructor for creating a new User instance
   /// from a map. Pass the map to the generated `_$UserFromJson()` constructor.

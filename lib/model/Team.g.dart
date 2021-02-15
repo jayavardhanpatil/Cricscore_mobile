@@ -7,17 +7,16 @@ part of 'Team.dart';
 // **************************************************************************
 
 Team _$TeamFromJson(Map<String, dynamic> json) {
-  return Team(
-    json['teamId'] as int,
-    json['teamName'] as String,
-    json['city'] == null
+  return Team()
+    ..teamId = json['teamId'] as int
+    ..teamName = json['teamName'] as String
+    ..city = json['city'] == null
         ? null
-        : City.fromJson(json['city'] as Map<String, dynamic>),
-    (json['players'] as List)
+        : City.fromJson(json['city'] as Map<String, dynamic>)
+    ..players = (json['players'] as List)
         ?.map((e) =>
             e == null ? null : Player.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-  );
+        ?.toList();
 }
 
 Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{

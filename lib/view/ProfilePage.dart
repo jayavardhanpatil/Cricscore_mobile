@@ -257,9 +257,9 @@ class _EditProfile extends State<EditProfile> {
             ),
             style: TextStyle(fontFamily: "Lemonada",)
         ),
-        suggestionsCallback: (pattern) {
+        suggestionsCallback: (pattern) async {
           List filteredCities = [];
-          for(City city in SharedPrefUtil.getCities()){
+          for(City city in await SharedPrefUtil.getCities()){
             print(city.toJson());
             if(city.cityName != null) {
               if (city.cityName.toLowerCase().startsWith(

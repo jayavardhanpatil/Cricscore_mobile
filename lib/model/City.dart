@@ -11,7 +11,7 @@ class City{
   String state;
 
 
-  City(this.cityId, this.cityName, this.state);
+  City();
 
 
   factory City.fromJson(Map<String, dynamic> json) => _$CityFromJson(json);

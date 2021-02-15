@@ -144,8 +144,8 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
                  try {
                    Navigator.of(context).pop();
                    Navigator.push(context,
-                       //MaterialPageRoute(builder: (context) => StartMatch()));
-                       MaterialPageRoute(builder: (context) => TeamSelect()));
+                       MaterialPageRoute(builder: (context) => StartMatch()));
+                       //MaterialPageRoute(builder: (context) => TeamSelect()));
                  } catch (e) {
                    print(e);
                  }
