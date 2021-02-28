@@ -10,10 +10,10 @@ Team _$TeamFromJson(Map<String, dynamic> json) {
   return Team()
     ..teamId = json['teamId'] as int
     ..teamName = json['teamName'] as String
-    ..city = json['city'] == null
+    ..teamCity = json['teamCity'] == null
         ? null
-        : City.fromJson(json['city'] as Map<String, dynamic>)
-    ..players = (json['players'] as List)
+        : City.fromJson(json['teamCity'] as Map<String, dynamic>)
+    ..playerList = (json['playerList'] as List)
         ?.map((e) =>
             e == null ? null : Player.fromJson(e as Map<String, dynamic>))
         ?.toList();
@@ -22,6 +22,6 @@ Team _$TeamFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
       'teamId': instance.teamId,
       'teamName': instance.teamName,
-      'city': instance.city,
-      'players': instance.players,
+      'teamCity': instance.teamCity,
+      'playerList': instance.playerList,
     };

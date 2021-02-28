@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/widget/Tost.dart';
@@ -258,17 +259,17 @@ class _EditProfile extends State<EditProfile> {
             style: TextStyle(fontFamily: "Lemonada",)
         ),
         suggestionsCallback: (pattern) async {
-          List filteredCities = [];
-          for(City city in await SharedPrefUtil.getCities()){
-            print(city.toJson());
-            if(city.cityName != null) {
-              if (city.cityName.toLowerCase().startsWith(
-                  pattern.toLowerCase())) {
-                filteredCities.add(city);
-              }
-            }
-            if(filteredCities.length == 10) break;
-          }
+          List<City> filteredCities = await HttpUtil.searchCity(pattern);
+          // for(City city in await SharedPrefUtil.getCities()){
+          //   print(city.toJson());
+          //   if(city.cityName != null) {
+          //     if (city.cityName.toLowerCase().startsWith(
+          //         pattern.toLowerCase())) {
+          //       filteredCities.add(city);
+          //     }
+          //   }
+          //   if(filteredCities.length == 10) break;
+          // }
           return filteredCities;
         },
         itemBuilder: (context, suggestion) {

@@ -11,8 +11,8 @@ class Team{
 
   int teamId;
   String teamName;
-  City city;
-  List<Player> players;
+  City teamCity;
+  List<Player> playerList;
 
   Team();
 

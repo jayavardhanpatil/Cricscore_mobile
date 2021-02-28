@@ -5,6 +5,7 @@ import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/widget/Tost.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../Constants.dart';
@@ -55,6 +56,93 @@ class HttpUtil {
       teams = List<Team>.from(l.map((model) => Team.fromJson(model)));
     }
     return teams;
+  }
+
+  static Future<List<Team>> searchTeams(String pattern) async{
+    List<Team> teams = [];
+    print("getting Teams");
+    final response = await http.get(
+        Constant.PROFILE_SERVICE_URL + "/teams/find?teamName="+pattern,
+        headers: _header
+    );
+    print("response");
+    print(response);
+
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      teams = List<Team>.from(l.map((model) => Team.fromJson(model)));
+    }
+    return teams;
+  }
+
+  static Future<List<City>> searchCity(String pattern) async{
+    List<City> cities = [];
+    print("getting Teams");
+    final response = await http.get(
+        Constant.PROFILE_SERVICE_URL + "/cities/find?cityName="+pattern,
+        headers: _header
+    );
+    print("response");
+    print(response);
+
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      cities = List<City>.from(l.map((model) => City.fromJson(model)));
+    }
+    return cities;
+  }
+
+  static Future<Team> getTeamDetails(int teamId) async{
+    Team team = Team();
+    final response = await http.get(
+      Constant.PROFILE_SERVICE_URL + "/teams/"+teamId.toString(), headers: _header,
+    );
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      team = Team.fromJson(json.decode(response.body));
+    }
+    return team;
+  }
+
+  static Future<List<Player>> getPlayersByCity(int cityId) async {
+    List<Player> players = [];
+    print("into getting Players");
+
+    final response = await http.get(
+      Constant.PROFILE_SERVICE_URL + "/players/city/"+cityId.toString(),
+      headers: _header
+    );
+
+    print("response");
+    print(response);
+
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      players = List<Player>.from(l.map((model) => Player.fromJson(model)));
+    }
+    return players;
+  }
+
+  static Future<List<Player>> searchPayer(String pattern) async {
+    List<Player> players = [];
+
+    var header = _header;
+    header.putIfAbsent("name", () => pattern);
+
+    final response = await http.get(
+        Constant.PROFILE_SERVICE_URL + "players/find",
+        headers: header
+    );
+
+    print("response");
+    print(response);
+
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      players = List<Player>.from(l.map((model) => Player.fromJson(model)));
+    }
+    return players;
   }
 
   static Future<List<Team>> addteam(Team team) async{

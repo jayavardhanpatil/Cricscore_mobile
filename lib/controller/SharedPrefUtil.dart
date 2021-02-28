@@ -179,20 +179,21 @@ class SharedPrefUtil{
   }
 
   static Future<List<City>> getCities() async {
-    if(haveKey("cities")){
-      return getObjList("cities", (v) => City.fromJson(v));
-    }
+    print("getting cities");
+    // if(haveKey("cities")){
+    //   return getObjList("cities", (v) => City.fromJson(v));
+    // }
     return fetchCities();
   }
 
   static Future<List<City>> fetchCities() async{
-    if(haveKey("cities")){
-      return json.decode(getString("cities"));
-    }else {
+    // if(haveKey("cities")){
+    //   return json.decode(getString("cities"));
+    // }else {
       List<City> listOfcities = await HttpUtil.getCities();
       await putObject("cities", listOfcities);
       return listOfcities;
-    }
+    //}
   }
 
   static Future<List<Team>> getTeams() async{
@@ -214,7 +215,49 @@ class SharedPrefUtil{
     }
   }
 
+  static void addSelectedPlayers(String teamName, List<Player> players){
+    putObject(Constant.SELECTED_PLAYERS+teamName, players);
+  }
+
+  static void addTeamPlayers(String teamName, List<Player> players){
+    putObject(Constant.TEAM_PLAYERS+teamName, players);
+  }
+
+  static Future<List<Player>> getPlayersFromtheCity(int cityId) async{
+    String key = Constant.PLAYERS_FROM_CITY+cityId.toString();
+    // if(haveKey(key)){
+    //   print("return from SharedPref");
+    //   return await json.decode(getString(key));
+    // }else {
+      List<Player> players = await HttpUtil.getPlayersByCity(cityId);
+      if (players.isNotEmpty) {
+        await putObject(key, players);
+      }
+      return players;
+    //}
+  }
+
+  static Future<List<Player>> getTeamPlayers(int teamId) async{
+    String key = Constant.TEAM_PLAYERS+teamId.toString();
+    // if(haveKey(key)){
+    //   print("return from SharedPref");
+    //   return await json.decode(getString(key));
+    // }else {
+    Team team = await HttpUtil.getTeamDetails(teamId);
+    if (team != null) {
+      await putObject(key,team);
+    }
+    return team.playerList;
+    //}
+  }
+
+
   static void addUpdate(List<String> citiesList){
     _preferences.setStringList("cities", citiesList);
+  }
+
+  static Future<List<Player>> searchPlayer(String pattern) async{
+    List<Player> players = await HttpUtil.searchPayer(pattern);
+    return players;
   }
 }

@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -7,35 +8,37 @@ import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/Team.dart';
+import 'package:cricscore/model/player.dart';
+import 'package:cricscore/widget/Loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+import 'StartMatch.dart';
 
 class TeamSelect extends StatefulWidget{
 
   _teamSelect createState() => _teamSelect();
 }
 
-class _teamSelect extends State<TeamSelect>{
+class _teamSelect extends State<TeamSelect> {
   bool _isNoItemFound = false;
   String _selectTeamAppBarTitle = "Select Team A";
-  TextEditingController _typeAheadTeamController;
-  TextEditingController _typeAheadCityController;
+  TextEditingController _typeAheadPlayerController;
   Team _team;
   City _city;
   var _height;
   var _width;
+  Map<String, Player> _listofUsers = new Map();
+  Map<String, Player> _selectedPlayers = new Map();
+
   initState(){
     _isNoItemFound = false;
     super.initState();
-    if(SharedPrefUtil.haveKey(Constant.TEAM_A)){
+    if (SharedPrefUtil.haveKey(Constant.TEAM_A)) {
       _selectTeamAppBarTitle = "Select Team B";
     }
-    _typeAheadTeamController = new TextEditingController();
-    _typeAheadCityController = new TextEditingController();
-    _team = Team();
-    _city = City();
   }
 
   @override
@@ -54,152 +57,64 @@ class _teamSelect extends State<TeamSelect>{
 
 
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: AutoSizeText(
-            _selectTeamAppBarTitle,
-            maxLines: 1,
-            style: TextStyle(
+      appBar: AppBar(
+        centerTitle: true,
+        title: AutoSizeText(
+          _selectTeamAppBarTitle,
+          maxLines: 1,
+          style: TextStyle(
             fontFamily: "Lemonada",
-            ),
-         ),
+          ),
+        ),
       ),
       body: _selectTeamDisplay(),
     );
   }
 
 
-  Widget _selectTeamDisplay(){
+  Widget _selectTeamDisplay() {
     return SingleChildScrollView(
       child: Column(
         children: [
+
           Container(
-            width: 0.9 * _width,
-            margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
-            child: TypeAheadFormField(
-              hideOnEmpty: true,
-              hideOnError: true,
-              direction: AxisDirection.down,
-              suggestionsBoxVerticalOffset: -10.0,
-              autoFlipDirection: true,
-              textFieldConfiguration: TextFieldConfiguration(
-                controller: this._typeAheadTeamController,
-                enabled: true,
-                decoration: InputDecoration(
-                    labelText: 'select team',
-                    border: OutlineInputBorder()
-                ),
-                style: TextStyle(fontFamily: "Lemonada",),
-              ),
-              suggestionsCallback: (pattern) async {
-                List filteredTeams = await getTeams(pattern);
-                setState(() {
-                  if(filteredTeams.isEmpty) _isNoItemFound = true;
-                  else _isNoItemFound = false;
-                });
+            margin: EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 20),
 
-                return filteredTeams;
-              },
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  leading: Icon(Icons.sports_cricket_sharp, color: Constant.PRIMARY_COLOR,),
-                  title: Text(suggestion.teamName, style: TextStyle(fontFamily: "Lemonada",),),
-                );
-              },
-              transitionBuilder: (context, suggestionsBox, controller) {
-                return suggestionsBox;
-              },
-              onSuggestionSelected: (suggestion) {
-                //this._city.text = suggestion;
-                this._team = suggestion as Team;
-                this._typeAheadTeamController.text = suggestion.teamName;
-              },
-            ),
-
-          ),
-
-          SizedBox(height: 1,),
-
-          Row(
-            children: [
-              Container(
-                width: 0.5 * _width,
-                padding: EdgeInsets.only(left: 20, right: 10),
-                child: TypeAheadFormField(
-                  hideOnError: true,
-                  direction: AxisDirection.down,
-                  suggestionsBoxVerticalOffset: -10.0,
-                  autoFlipDirection: true,
-                  textFieldConfiguration: TextFieldConfiguration(
-                    controller: this._typeAheadCityController,
-                    enabled: true,
-                    decoration: InputDecoration(
-                      labelText: 'select City',
-                    ),
-                    style: TextStyle(fontFamily: "Lemonada",),
-                  ),
-                  suggestionsCallback: (pattern) async {
-                    List filteredCities = [];
-                    for(City city in await SharedPrefUtil.getCities()){
-                      print(city.toJson());
-                      if(city.cityName != null) {
-                        if (city.cityName.toLowerCase().startsWith(
-                            pattern.toLowerCase())) {
-                          filteredCities.add(city);
-                        }
-                      }
-                      if(filteredCities.length == 10) break;
-                    }
-                    return filteredCities;
-                  },
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
-                      title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
-                    );
-                  },
-                  transitionBuilder: (context, suggestionsBox, controller) {
-                    return suggestionsBox;
-                  },
-                  onSuggestionSelected: (suggestion) {
-                    //this._city.text = suggestion;
-                    this._city = suggestion as City;
-                    this._typeAheadCityController.text = suggestion.cityName + ", " + suggestion.state;
-                  },
-                ),
-              ),
-
-              Container(
-                margin: EdgeInsets.only(left: 0.05 * _width),
-                child: (_isNoItemFound) ? RaisedButton(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                    child: AutoSizeText(
-                      "Add team",
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w200,
-                        color: Colors.white,
-                        fontFamily: "Lemonada",
+            child: Row(
+              children: [
+                Container(
+                  alignment: Alignment.topRight,
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: new ExactAssetImage(
+                              'lib/assets/images/default_profile_avatar.png'),
+                          fit: BoxFit.fill
                       ),
-                    ),
+                      color: Constant.PRIMARY_COLOR
                   ),
-                  color: Constant.PRIMARY_COLOR,
+                ),
 
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0)),
-                  onPressed: () {
-                    setState(() {
-                      _isNoItemFound = false;
-                    });
-
-                    this._team.city = this._city;
-                    HttpUtil.addteam(this._team);
-                  },
-                ) : null,
-              )
-            ],
+                Container(
+                  margin: EdgeInsets.only(left: 20),
+                  child: Column(
+                    children: [
+                      Text(
+                          'Team A',
+                          style: TextStyle(fontSize: 18)
+                      ),
+                      SizedBox(height: 5,),
+                      Text(
+                          'Bangalore',
+                          style: TextStyle(fontSize: 12)
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
 
 
@@ -213,66 +128,47 @@ class _teamSelect extends State<TeamSelect>{
             child: DefaultTabController(
                 length: 3, // length of tabs
                 initialIndex: 0,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
 
-                  Container(
-                    child: TabBar(
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.black,
-                      indicatorColor: Colors.black,
-                      indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: Constant.PRIMARY_COLOR),
-                      tabs: [
-                        Tab(text: 'Playing Squad'),
-                        Tab(text: 'Team Squad'),
-                        Tab(text: 'Add Player'),
-                      ],
-                    ),
-                  ),
-
-                  Container(
-                      height: 400, //height of TabBarView
-                      decoration: BoxDecoration(
-                          border: Border(top: BorderSide(color: Colors.grey, width: 0.5))
+                      Container(
+                        child: TabBar(
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.black,
+                          indicatorColor: Colors.black,
+                          indicator: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Constant.PRIMARY_COLOR),
+                          tabs: [
+                            Tab(text: 'Playing Squad'),
+                            Tab(text: 'Team Squad'),
+                            Tab(text: 'Add Player'),
+                          ],
+                        ),
                       ),
-                      child: TabBarView(children: <Widget>[
-                        Container(
-                          child: GridView.count(
-                            // Create a grid with 2 columns. If you change the scrollDirection to
-                            // horizontal, this produces 2 rows.
-                            crossAxisCount: 3,
-                            // Generate 100 widgets that display their index in the List.
-                            children: List.generate(5, (index) {
-                              return Center(
-                                child: Text(
-                                  'Item $index',
-                                  style: Theme.of(context).textTheme.headline5,
-                                ),
-                              );
-                            }),
 
+                      Container(
+                          height: 400, //height of TabBarView
+                          decoration: BoxDecoration(
+                              border: Border(top: BorderSide(
+                                  color: Colors.grey, width: 0.5))
                           ),
-                        ),
-
-                        // Container(
-                        //   child: Center(
-                        //     child: Text('No squad selected', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        //   ),
-                        // ),
-                        Container(
-                          child: Center(
-                            child: Text('Please select players from the grid', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        Container(
-                          child: Center(
-                            child: Text('Please search players from the grid', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ])
-                  )
-                ])
+                          child: TabBarView(children: <Widget>[
+                            Container(
+                                child : selectedPlayers(context),
+                            ),
+                            Container(
+                              child: Center(
+                                child: teamPlayers(context, 30),
+                              ),
+                            ),
+                            Container(
+                              child: playersForaGivenCity(context, 12),
+                                      //child: Text('Please search players from the grid', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold
+                            ),
+                          ])
+                      )
+                    ])
             ),
           ),
         ],
@@ -281,18 +177,238 @@ class _teamSelect extends State<TeamSelect>{
     );
   }
 
-  Future<List<Team>> getTeams(String pattern) async{
+  Future<List<Team>> getTeams(String pattern) async {
     List<Team> filteredTeams = await HttpUtil.getTeams();
-    for(Team team in filteredTeams){
+    for (Team team in filteredTeams) {
       print(team.toJson());
-      if(team.teamName != null) {
+      if (team.teamName != null) {
         if (team.teamName.toLowerCase().startsWith(
             pattern.toLowerCase())) {
           filteredTeams.add(team);
         }
       }
-      if(filteredTeams.length == 10) break;
+      if (filteredTeams.length == 10) break;
     }
     return filteredTeams;
   }
+
+  Widget selectedPlayers(BuildContext context){
+    List<Player> selectedPlayers = _selectedPlayers.values.toList();
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      itemCount: selectedPlayers.length,
+      itemBuilder: (context, index){
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 1),
+          child: ListTile(
+            contentPadding: EdgeInsets.only(left: 20),
+            leading: CircleAvatar(
+              backgroundImage: ExactAssetImage(
+                  "lib/assets/images/default_profile_avatar.png"),
+              backgroundColor: Color(0xFF75A2EA),
+            ),
+            title: Text(
+              selectedPlayers[index].name,
+              style: TextStyle(fontFamily: "Lemonada",),
+            ),
+                subtitle: Text(
+                  selectedPlayers[index].phoneNumber.toString()),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget playersForaGivenCity(BuildContext context, int cityId) {
+    return FutureBuilder(
+        future: SharedPrefUtil.getPlayersFromtheCity(cityId),
+        // ignore: missing_return
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            print("Snap shot is null");
+            return Loading();
+          } else if (snapshot.hasData) {
+            List<Player> players = snapshot.data;
+            if (players.length > 0) {
+
+                 return ListView.builder(
+                  itemCount: players.length,
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 1),
+                      color: this._selectedPlayers.containsKey(players[index].uuid) ? Color(0xFF6190E8) : null,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.only(left: 20),
+                        leading: CircleAvatar(
+                          backgroundImage: ExactAssetImage(
+                              "lib/assets/images/default_profile_avatar.png"),
+                          backgroundColor: Colors.black,
+                        ),
+                        title: Text(
+                          players[index].name,
+                          style: this._selectedPlayers.containsKey(players[index].uuid) ? TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Lemonada",
+                          ) : TextStyle(fontFamily: "Lemonada",),
+                        ),
+                        subtitle: Text(
+                          players[index].phoneNumber.toString().substring(
+                              0, 3) + "****" +
+                              players[index].phoneNumber.toString().substring(
+                                  players[index].phoneNumber
+                                      .toString()
+                                      .length - 3),
+                          style: this._selectedPlayers.containsKey(players[index].uuid) ?
+                          TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Lemonada",
+                          ) : TextStyle(fontFamily: "Lemonada",),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            if(!this._selectedPlayers.containsKey(players[index].uuid)){
+                              _selectedPlayers.update(players[index].uuid,
+                                      (value) => players[index],ifAbsent: () => players[index]);
+                              //_selectedPlayers.add(players[index]);
+                            }else{
+                              _selectedPlayers.remove(players[index].uuid);
+                            }
+                            //_selectedPlayers[index] = !_selected[index];
+                            print(_selectedPlayers.toString());
+                          });
+                        },
+                      ),
+                    );
+                  }
+              );
+            }
+            else {
+              return Text("No players in your City \nYou may want to search by Player Name");
+            }
+          } else {
+            return Text("No players in your City \nYou may want to search by Player Name");
+          }
+        });
+  }
+
+  Widget teamPlayers(BuildContext context, int teamId) {
+    return FutureBuilder(
+        future: SharedPrefUtil.getTeamPlayers(teamId),
+        // ignore: missing_return
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            print("Snap shot is null");
+            return Loading();
+          } else if (snapshot.hasData) {
+            List<Player> players = snapshot.data;
+            if (players.length > 0) {
+              return ListView.builder(
+                  itemCount: players.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 1),
+                      color: this._selectedPlayers.containsKey(players[index].uuid) ? Color(0xFF6190E8) : null,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.only(left: 20),
+                        leading: CircleAvatar(
+                          backgroundImage: ExactAssetImage(
+                              "lib/assets/images/default_profile_avatar.png"),
+                          backgroundColor: Colors.black,
+                        ),
+                        title: Text(
+                          players[index].name,
+                          style: this._selectedPlayers.containsKey(players[index].uuid) ? TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Lemonada",
+                          ) : TextStyle(fontFamily: "Lemonada",),
+                        ),
+                        subtitle: Text(
+                          players[index].phoneNumber.toString().substring(
+                              0, 3) + "****" +
+                              players[index].phoneNumber.toString().substring(
+                                  players[index].phoneNumber
+                                      .toString()
+                                      .length - 3),
+                          style: this._selectedPlayers.containsKey(players[index].uuid) ?
+                          TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Lemonada",
+                          ) : TextStyle(fontFamily: "Lemonada",),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            if(!this._selectedPlayers.containsKey(players[index].uuid)){
+                              _selectedPlayers.update(players[index].uuid,
+                                      (value) => players[index],ifAbsent: () => players[index]);
+                              //_selectedPlayers.add(players[index]);
+                            }else{
+                              _selectedPlayers.remove(players[index].uuid);
+                            }
+                            //_selectedPlayers[index] = !_selected[index];
+                            print(_selectedPlayers.toString());
+                          });
+                        },
+                      ),
+                    );
+                  }
+              );
+            }
+            else {
+              return Text("No players in your City \nYou may want to search by Player Name");
+            }
+          } else {
+            return Text("No players in your City \nYou may want to search by Player Name");
+          }
+        });
+  }
+
+  Widget searchPlayerTextField(TextEditingController typeAheadTeamController, Team team){
+    return Container(
+      width: 0.9 * _width,
+      //margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+      child: TypeAheadFormField(
+        hideOnEmpty: true,
+        hideOnError: true,
+        //direction: AxisDirection.down,
+        suggestionsBoxVerticalOffset: -10.0,
+        autoFlipDirection: true,
+        textFieldConfiguration: TextFieldConfiguration(
+          controller: typeAheadTeamController,
+          enabled: true,
+          decoration: InputDecoration(
+            labelText: 'search Player',
+            //border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.search),
+          ),
+          style: TextStyle(fontFamily: "Lemonada",),
+        ),
+        suggestionsCallback: (pattern) async {
+          List filteredTeams = await SharedPrefUtil.searchPlayer(pattern);
+          return filteredTeams;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            leading: Icon(Icons.sports_cricket_sharp, color: Constant.PRIMARY_COLOR,),
+            title: Text(suggestion.teamName, style: TextStyle(fontFamily: "Lemonada",),),
+          );
+        },
+        transitionBuilder: (context, suggestionsBox, controller) {
+          return suggestionsBox;
+        },
+        onSuggestionSelected: (suggestion) {
+          typeAheadTeamController.text = suggestion.teamName;
+          team.teamName = typeAheadTeamController.text;
+        },
+      ),
+    );
+  }
+
 }
+
