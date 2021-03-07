@@ -9,13 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
-import 'SelectTeam.dart';
+import 'TeamPlayers.dart';
 
 
-class _StartMatch extends State<StartMatch> {
-
-  String previousvalueFirstTeam = "";
-  String previousvalueSecondteam = "";
+class _SelectTeams extends State<SelectTeam> {
 
   String todaysDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -26,9 +23,6 @@ class _StartMatch extends State<StartMatch> {
 
   Team teamA;
   Team teamB;
-
-  bool _isFirstTeamFound = true;
-  bool _isSecondTeamFound = true;
 
   var _width;
   var _height;
@@ -76,7 +70,7 @@ class _StartMatch extends State<StartMatch> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                searchTeamTextField(this._typeFirstAheadTeamController, this._isFirstTeamFound, teamA),
+                searchTeamTextField(this._typeFirstAheadTeamController, true, this._typeFirstAheadCityController),
                 SizedBox(height: 0.1,),
 
                 Row(children: <Widget>[
@@ -84,7 +78,7 @@ class _StartMatch extends State<StartMatch> {
                       child: searchCity(this._typeFirstAheadCityController),
                     ),
                     Container(
-                      child: addPlayersButton(this._typeFirstAheadTeamController.text, this._typeFirstAheadCityController.text),
+                      child: addPlayersButton(teamA, true),
                     )
                   ],
                 ),
@@ -95,7 +89,7 @@ class _StartMatch extends State<StartMatch> {
 
                 SizedBox(height: _height * 0.05,),
 
-                searchTeamTextField(this._typeSecondAheadTeamController, this._isSecondTeamFound, teamB),
+                searchTeamTextField(this._typeSecondAheadTeamController, false, this._typeSecondAheadCityController),
                 SizedBox(height: 0.1,),
 
                 Row(children: <Widget>[
@@ -103,7 +97,7 @@ class _StartMatch extends State<StartMatch> {
                     child: searchCity(this._typeSecondAheadCityController),
                   ),
                   Container(
-                    child: addPlayersButton(this._typeSecondAheadTeamController.text, this._typeSecondAheadCityController.text),
+                    child: addPlayersButton(teamB, false),
                   )
                 ],
                 ),
@@ -127,10 +121,18 @@ class _StartMatch extends State<StartMatch> {
                     ),
                   ),
                   onPressed: () {
+
+                    //Create Match Id and store the details in Backend System
+                    //
+
                     print(this._typeFirstAheadTeamController.text);
                     print(this._typeFirstAheadCityController.text);
                     print(this._typeSecondAheadTeamController.text);
                     print(this._typeSecondAheadCityController.text);
+
+                    print(teamA.toJson());
+                    print(teamB.toJson());
+
                   },
                 ),
 
@@ -187,7 +189,7 @@ class _StartMatch extends State<StartMatch> {
     );
   }
 
-  Widget searchTeamTextField(TextEditingController typeAheadTeamController, bool _isTeamFound, Team team){
+  Widget searchTeamTextField(TextEditingController typeAheadTeamController, bool isFirstTeam, TextEditingController typeAheadCity){
     return Container(
       width: 0.9 * _width,
       margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -202,7 +204,7 @@ class _StartMatch extends State<StartMatch> {
           enabled: true,
           decoration: InputDecoration(
               labelText: 'select team',
-              suffixIcon: (_isTeamFound) ? null : Icon(Icons.add_circle_outline),
+              //suffixIcon: (_isTeamFound) ? null : Icon(Icons.add_circle_outline),
           ),
           style: TextStyle(fontFamily: "Lemonada",),
         ),
@@ -221,7 +223,7 @@ class _StartMatch extends State<StartMatch> {
         itemBuilder: (context, suggestion) {
           return ListTile(
             leading: Icon(Icons.sports_cricket_sharp, color: Constant.PRIMARY_COLOR,),
-            title: Text(suggestion.teamName + ", " + suggestion.teamCity.cityName, style: TextStyle(fontFamily: "Lemonada",),),
+            title: Text(suggestion.teamName + " ( " + suggestion.teamCity.cityName +" )", style: TextStyle(fontFamily: "Lemonada",),),
           );
         },
         transitionBuilder: (context, suggestionsBox, controller) {
@@ -229,13 +231,26 @@ class _StartMatch extends State<StartMatch> {
         },
         onSuggestionSelected: (suggestion) {
           typeAheadTeamController.text = suggestion.teamName;
-          team.teamName = typeAheadTeamController.text;
+          setState(() {
+            if(isFirstTeam)
+              teamA = suggestion;
+            else
+              teamB = suggestion;
+          });
+          typeAheadCity.text = suggestion.teamCity.cityName;
         },
       ),
     );
   }
 
-  addPlayersButton(String currentTeamName, String teamCity){
+  addPlayersButton(Team team, bool isteamA){
+
+    if(isteamA){
+      SharedPrefUtil.putObject(Constant.TEAM_A, team);
+    }else{
+      SharedPrefUtil.putObject(Constant.TEAM_B, team);
+    }
+
     return Container(
       //width: 0.4 * _width,
       padding: EdgeInsets.only(left: 20),
@@ -258,14 +273,14 @@ class _StartMatch extends State<StartMatch> {
               ),
             ),
             onPressed: () {
-              print("current Team Name : " + currentTeamName);
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => TeamSelect()));
+              print("current Team Name : " + team.teamName);
+              //Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SelectTeamPlayers(team: team,)));
             },
             icon: Icon(Icons.add_circle, color: Colors.white,),
 //              label: Text("Players", style: TextStyle(
 //                  color: Colors.white, fontWeight: FontWeight.w600, fontSize: 20),
-//              ),
+//              )
           ),
 
         ],
@@ -290,8 +305,8 @@ Future<List<City>> searchCities(String pattern) async{
   return filteredTeams;
 }
 
-class StartMatch extends StatefulWidget{
+class SelectTeam extends StatefulWidget{
 
-  _StartMatch createState() => _StartMatch();
+  _SelectTeams createState() => _SelectTeams();
 
 }

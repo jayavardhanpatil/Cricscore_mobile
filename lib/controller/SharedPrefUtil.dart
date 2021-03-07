@@ -5,7 +5,6 @@ import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -229,7 +228,9 @@ class SharedPrefUtil{
     //   print("return from SharedPref");
     //   return await json.decode(getString(key));
     // }else {
+    print("Getting data from future Object");
       List<Player> players = await HttpUtil.getPlayersByCity(cityId);
+      print(players.length);
       if (players.isNotEmpty) {
         await putObject(key, players);
       }

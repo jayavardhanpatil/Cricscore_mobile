@@ -7,12 +7,12 @@ import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/view/MatchSummary.dart';
 import 'package:cricscore/view/ProfilePage.dart';
-import 'package:cricscore/view/SelectTeam.dart';
+import 'package:cricscore/view/TeamPlayers.dart';
 import 'package:cricscore/widget/Loader.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'StartMatch.dart';
+import 'Teams.dart';
 
 class HomeView extends StatefulWidget {
 
@@ -144,7 +144,7 @@ class _HomeView extends State<HomeView> with TickerProviderStateMixin{
                  try {
                    Navigator.of(context).pop();
                    Navigator.push(context,
-                       MaterialPageRoute(builder: (context) => StartMatch()));
+                       MaterialPageRoute(builder: (context) => SelectTeam()));
                  } catch (e) {
                    print(e);
                  }
