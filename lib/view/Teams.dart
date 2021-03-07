@@ -5,11 +5,14 @@ import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/widget/RowBoxDecoration.dart';
+import 'package:cricscore/widget/TypeAheadWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'StartMatch.dart';
 import 'TeamPlayers.dart';
+
 
 
 class _SelectTeams extends State<SelectTeam> {
@@ -75,7 +78,7 @@ class _SelectTeams extends State<SelectTeam> {
 
                 Row(children: <Widget>[
                     Container(
-                      child: searchCity(this._typeFirstAheadCityController),
+                      child: searchCity(this._typeFirstAheadCityController, 0.5 * _width, "Select City"),
                     ),
                     Container(
                       child: addPlayersButton(teamA, true),
@@ -94,7 +97,7 @@ class _SelectTeams extends State<SelectTeam> {
 
                 Row(children: <Widget>[
                   Container(
-                    child: searchCity(this._typeSecondAheadCityController),
+                    child: searchCity(this._typeSecondAheadCityController, 0.5 * _width, "Select City"),
                   ),
                   Container(
                     child: addPlayersButton(teamB, false),
@@ -124,14 +127,15 @@ class _SelectTeams extends State<SelectTeam> {
 
                     //Create Match Id and store the details in Backend System
                     //
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>(StartMatch())));
 
-                    print(this._typeFirstAheadTeamController.text);
-                    print(this._typeFirstAheadCityController.text);
-                    print(this._typeSecondAheadTeamController.text);
-                    print(this._typeSecondAheadCityController.text);
-
-                    print(teamA.toJson());
-                    print(teamB.toJson());
+                    // print(this._typeFirstAheadTeamController.text);
+                    // print(this._typeFirstAheadCityController.text);
+                    // print(this._typeSecondAheadTeamController.text);
+                    // print(this._typeSecondAheadCityController.text);
+                    //
+                    // print(teamA.toJson());
+                    // print(teamB.toJson());
 
                   },
                 ),
@@ -140,52 +144,6 @@ class _SelectTeams extends State<SelectTeam> {
             ),
           ],
         ),
-    );
-  }
-
-
-  Widget searchCity(TextEditingController typeAheadCityController){
-   return Row(
-      children: [
-        Container(
-          width: 0.5 * _width,
-          padding: EdgeInsets.only(left: 20, right: 10),
-          child: TypeAheadFormField(
-            hideOnError: true,
-           // direction: AxisDirection.down,
-            suggestionsBoxVerticalOffset: -10.0,
-            autoFlipDirection: true,
-            hideOnLoading: true,
-            getImmediateSuggestions: false,
-            textFieldConfiguration: TextFieldConfiguration(
-              controller: typeAheadCityController,
-              enabled: true,
-              decoration: InputDecoration(
-                labelText: 'search City',
-                //prefixIcon: Icon(Icons.search)
-              ),
-              style: TextStyle(fontFamily: "Lemonada",),
-            ),
-            suggestionsCallback: (pattern) async {
-              List<City> filteredCities = await searchCities(pattern);
-              return filteredCities;
-            },
-            itemBuilder: (context, suggestion) {
-              return ListTile(
-                leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
-                title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
-              );
-            },
-            transitionBuilder: (context, suggestionsBox, controller) {
-              return suggestionsBox;
-            },
-            onSuggestionSelected: (suggestion) {
-              typeAheadCityController.text = suggestion.cityName + ", " + suggestion.state;
-            },
-          ),
-        ),
-
-      ],
     );
   }
 

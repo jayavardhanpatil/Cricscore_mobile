@@ -15,4 +15,8 @@ class Constant{
   static final String TEAM_PLAYERS = "SELECTED_PLAYERS_";
   static final String PLAYERS_FROM_CITY = "PLAYERS_FROM_";
 
+  static final String BATTING = "BAT";
+  static final String BOWLING = "BOWL";
+
+
 }

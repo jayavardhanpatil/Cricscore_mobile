@@ -553,13 +553,19 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
   }
 
   List<Player> filter(List<Player> playersList){
+    List<Player> playingForOtherteam = [];
     if (_otherTeamselectedPlayers.isNotEmpty) {
       for (int i = 0; i < playersList.length; i++) {
         if (_otherTeamselectedPlayers.containsKey(playersList[i].uuid)) {
-          playersList.removeAt(i);
+          playingForOtherteam.add(playersList[i]);
         }
       }
     }
+
+    playingForOtherteam.forEach((element) {
+      playersList.remove(element);
+    });
+
     return playersList;
   }
 

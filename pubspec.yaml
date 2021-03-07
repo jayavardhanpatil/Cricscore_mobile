@@ -57,10 +57,14 @@ dependencies:
   #Type ahead
   flutter_typeahead: ^1.8.0
 
+  #RadioButtton
+  custom_radio_grouped_button: any
+
   #Http URL
   http: ^0.12.2
 
   fluttertoast: ^4.0.1
+  direct_select_flutter: ^1.0.5
 
 dev_dependencies:
   flutter_test:

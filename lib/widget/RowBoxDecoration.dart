@@ -1,5 +1,6 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cricscore/Constants.dart';
 import 'package:flutter/material.dart';
 
 Row rowWithText(String text){
@@ -45,9 +46,9 @@ getButtonGradientColor(BoxShape shape){
     borderRadius: (shape != BoxShape.circle) ? BorderRadius.circular(50) : null,
     gradient: LinearGradient(
         colors: <Color>[
-          Color(0xFF6190E8),
+          Constant.PRIMARY_COLOR,
           Color(0xFF1976D2),
-          Color(0xFF6190E8),
+          Constant.PRIMARY_COLOR
 //         Color(0xFF090979),
 //         Color(0xFF42A5F5),
 //         Color(0xFF090979),
