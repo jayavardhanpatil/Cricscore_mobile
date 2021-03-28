@@ -16,7 +16,20 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
     ..phoneNumber = json['phoneNumber'] as int
     ..dateOfBirth = json['dateOfBirth'] as String
     ..email = json['email'] as String
-    ..photoUrl = json['photoUrl'] as String;
+    ..photoUrl = json['photoUrl'] as String
+    ..isOnStrike = json['isOnStrike'] as bool
+    ..run = json['run'] as int
+    ..wicket = json['wicket'] as int
+    ..extra = json['extra'] as int
+    ..overs = json['overs'] as double
+    ..ballsFaced = json['ballsFaced'] as int
+    ..runsGiven = json['runsGiven'] as int
+    ..numberOfFours = json['numberOfFours'] as int
+    ..numberOfsixes = json['numberOfsixes'] as int
+    ..centuries = json['centuries'] as int
+    ..fifties = json['fifties'] as int
+    ..playedPosition = json['playedPosition'] as int
+    ..isOut = json['isOut'] as bool;
 }
 
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
@@ -27,4 +40,17 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'dateOfBirth': instance.dateOfBirth,
       'email': instance.email,
       'photoUrl': instance.photoUrl,
+      'isOnStrike': instance.isOnStrike,
+      'run': instance.run,
+      'wicket': instance.wicket,
+      'extra': instance.extra,
+      'overs': instance.overs,
+      'ballsFaced': instance.ballsFaced,
+      'runsGiven': instance.runsGiven,
+      'numberOfFours': instance.numberOfFours,
+      'numberOfsixes': instance.numberOfsixes,
+      'centuries': instance.centuries,
+      'fifties': instance.fifties,
+      'playedPosition': instance.playedPosition,
+      'isOut': instance.isOut,
     };

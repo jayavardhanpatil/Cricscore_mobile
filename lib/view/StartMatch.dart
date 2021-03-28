@@ -2,15 +2,21 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
+import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/view/TossPage.dart';
 import 'package:cricscore/widget/RowBoxDecoration.dart';
 import 'package:cricscore/widget/TypeAheadWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+import 'Teams.dart';
 
 class StartMatch extends StatefulWidget{
-
-  _StartMatch createState() => _StartMatch();
+  MatchGame matchGame;
+  StartMatch({Key key, @required this.matchGame}) : super (key : key);
+  _StartMatch createState() => _StartMatch(this.matchGame);
 
 }
 
@@ -19,11 +25,16 @@ class _StartMatch extends State<StartMatch>{
   Team _teamA;
   Team _teamB;
 
+  MatchGame matchGame;
+
+  _StartMatch(this.matchGame);
+
   var _width;
   var _height;
+  City matchVenue;
 
-  TextEditingController typeAheadCityController;
-  TextEditingController _oversController;
+  final TextEditingController typeAheadCityController = new TextEditingController();
+  final TextEditingController _oversController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +42,12 @@ class _StartMatch extends State<StartMatch>{
 
     _teamA = Team.fromJson(SharedPrefUtil.getObject(Constant.TEAM_A));
     _teamB = Team.fromJson(SharedPrefUtil.getObject(Constant.TEAM_B));
-    typeAheadCityController = new TextEditingController();
-    _oversController = new TextEditingController();
+    // typeAheadCityController = new TextEditingController();
+    // _oversController = new TextEditingController();typeAheadCityController = new TextEditingController();
+    // _oversController = new TextEditingController();
+
+    matchGame.teams.putIfAbsent(_teamA.teamName, () => _teamA);
+    matchGame.teams.putIfAbsent(_teamB.teamName, () => _teamB);
 
     _width = MediaQuery
         .of(context)
@@ -124,7 +139,7 @@ class _StartMatch extends State<StartMatch>{
                 width: _width * 0.9,
                 child: Column(
                   children: [
-                    searchCity(typeAheadCityController, 0.9 * _width, "Select Match Venue")
+                    searchCityForVenue(typeAheadCityController, 0.9 * _width, "Select Match Venue")
                   ],
                 ),
               ),
@@ -162,13 +177,14 @@ class _StartMatch extends State<StartMatch>{
                   ),
                 ),
                 onPressed: () async {
+                  this.matchGame.totalOvers = int.parse(_oversController.text);
                     //Sync with Server
                     //Add Match Details in the SharedPreff
                     //Add is Active Match to check if app is crashed retreive from where it was left
                   //return await showDialog(context: context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>(TossPage())));
-                  // showDialog(context: context,
-                  //   builder: (context) => TossPage());
+                  //Navigator.push(context, MaterialPageRoute(builder: (context) =>(TossPage())));
+                   showDialog(context: context,
+                     builder: (context) => TossPage(matchGame: this.matchGame));
                 },
               ),
 
@@ -214,6 +230,52 @@ class _StartMatch extends State<StartMatch>{
       onPressed: () {
         //Navigator.push(context, MaterialPageRoute(builder: (context) => ViewSquad(team: team1)));
       },
+    );
+  }
+
+  Widget searchCityForVenue(TextEditingController typeAheadCityController, double fieldwidth, String fieldPlaceHolder){
+    return Row(
+      children: [
+        Container(
+          width: fieldwidth,
+          padding: EdgeInsets.only(left: 20, right: 10),
+          child: TypeAheadFormField(
+            hideOnError: true,
+            // direction: AxisDirection.down,
+            suggestionsBoxVerticalOffset: -10.0,
+            autoFlipDirection: true,
+            hideOnLoading: true,
+            getImmediateSuggestions: false,
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: typeAheadCityController,
+              enabled: true,
+              decoration: InputDecoration(
+                labelText: fieldPlaceHolder,
+                //prefixIcon: Icon(Icons.search)
+              ),
+              style: TextStyle(fontFamily: "Lemonada",),
+            ),
+            suggestionsCallback: (pattern) async {
+              List<City> filteredCities = await searchCities(pattern);
+              return filteredCities;
+            },
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
+                title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
+              );
+            },
+            transitionBuilder: (context, suggestionsBox, controller) {
+              return suggestionsBox;
+            },
+            onSuggestionSelected: (suggestion) {
+              this.matchGame.matchVenue = suggestion;
+              typeAheadCityController.text = suggestion.cityName + ", " + suggestion.state;
+            },
+          ),
+        ),
+
+      ],
     );
   }
 

@@ -206,12 +206,11 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
               ),
             ),
             onPressed: () {
-              print(_selectedPlayers);
-              print(_selectedPlayers.length);
               SharedPrefUtil.putObject(
                   team.teamName + "_" + Constant.SELECTED_PLAYERS,
                   _selectedPlayers);
-              updateTeamPlayer();
+              updateTeamPlayer(_selectedPlayers.values.toList());
+              Navigator.of(context).pop();
             },
             icon: Icon(Icons.done, color: Colors.white,),
 //              label: Text("Players", style: TextStyle(
@@ -224,11 +223,10 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
     );
   }
 
-  updateTeamPlayer() async {
-    //team.playerList = await SharedPrefUtil.getTeamPlayers(team.teamId);
-    //Add newly added players
-
+  updateTeamPlayer(List<Player> _selectedPlayers) async {
+    this.team.playerList = _selectedPlayers;
     //print(team.playerList.length);
+    print("Team players added : for : "+team.teamName);
   }
 
   Future<List<Team>> getTeams(String pattern) async {
@@ -483,14 +481,14 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
             leading: Icon(
               Icons.sports_cricket_sharp, color: Constant.PRIMARY_COLOR,),
             title: Text(
-              suggestion.teamName, style: TextStyle(fontFamily: "Lemonada",),),
+              suggestion.currentBattingteam, style: TextStyle(fontFamily: "Lemonada",),),
           );
         },
         transitionBuilder: (context, suggestionsBox, controller) {
           return suggestionsBox;
         },
         onSuggestionSelected: (suggestion) {
-          typeAheadTeamController.text = suggestion.teamName;
+          typeAheadTeamController.text = suggestion.currentBattingteam;
           team.teamName = typeAheadTeamController.text;
         },
       ),

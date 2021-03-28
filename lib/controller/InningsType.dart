@@ -1,0 +1,7 @@
+
+enum InningType{
+
+  BAT,
+  BOWL,
+
+}

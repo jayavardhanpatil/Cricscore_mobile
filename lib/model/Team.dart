@@ -12,7 +12,7 @@ class Team{
   int teamId;
   String teamName;
   City teamCity;
-  List<Player> playerList;
+  List<Player> playerList = [];
 
   Team();
 

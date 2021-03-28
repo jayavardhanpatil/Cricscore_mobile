@@ -3,6 +3,7 @@ import 'package:cricscore/Constants.dart';
 import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/widget/RowBoxDecoration.dart';
 import 'package:cricscore/widget/TypeAheadWidget.dart';
@@ -27,10 +28,13 @@ class _SelectTeams extends State<SelectTeam> {
   Team teamA;
   Team teamB;
 
+  MatchGame matchgame;
+  
   var _width;
   var _height;
   initState(){
     super.initState();
+    matchgame = MatchGame();
     teamA = Team();
     teamB = Team();
   }
@@ -127,7 +131,9 @@ class _SelectTeams extends State<SelectTeam> {
 
                     //Create Match Id and store the details in Backend System
                     //
-                    Navigator.push(context, MaterialPageRoute(builder: (context) =>(StartMatch())));
+                    matchgame.teams.putIfAbsent(teamA.teamName, () => teamA);
+                    matchgame.teams.putIfAbsent(teamB.teamName, () => teamB);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>(StartMatch(matchGame: this.matchgame))));
 
                     // print(this._typeFirstAheadTeamController.text);
                     // print(this._typeFirstAheadCityController.text);
