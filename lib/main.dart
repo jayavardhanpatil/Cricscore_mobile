@@ -25,5 +25,8 @@ class MyApp extends StatelessWidget {
       primaryColor: Color(Constant.PRIMARY_THEME_COLOR),
     ),
     home: HomeController(),
+    routes: <String, WidgetBuilder>{
+      '/home': (BuildContext context) => HomeController(),
+    },
   );
 }

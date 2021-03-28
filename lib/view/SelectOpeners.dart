@@ -189,7 +189,7 @@ class _SelectOpeners extends State<SelectOpeners>{
                       this.match.secondInning = initializeInning(bowling, batting);
                     }else{
                       this.match.secondInning = initializeInning(batting, bowling);
-                      this.match.firstInning = initializeInning(bowling, batting);
+                      //this.match.firstInning = initializeInning(bowling, batting);
                     }
 
                     this.match.currentPlayers = currentPlayer;
