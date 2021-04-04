@@ -131,8 +131,9 @@ class _SelectTeams extends State<SelectTeam> {
 
                     //Create Match Id and store the details in Backend System
                     //
-                    matchgame.teams.putIfAbsent(teamA.teamName, () => teamA);
-                    matchgame.teams.putIfAbsent(teamB.teamName, () => teamB);
+                    matchgame.teamA = teamA;
+                    matchgame.teamB = teamB;
+
                     Navigator.push(context, MaterialPageRoute(builder: (context) =>(StartMatch(matchGame: this.matchgame))));
 
                     // print(this._typeFirstAheadTeamController.text);

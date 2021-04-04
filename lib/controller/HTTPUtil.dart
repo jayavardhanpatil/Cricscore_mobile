@@ -1,16 +1,22 @@
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/CurrentPlayer.dart';
+import 'package:cricscore/model/Innings.dart';
+import 'package:cricscore/model/MatchEntity.dart';
+import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
-import 'package:cricscore/widget/Tost.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../Constants.dart';
 
 class HttpUtil {
+
+  static String _url = "https://jsonplaceholder.typicode.com/users";
 
   static Map<String, String> _header = {
     "Content-Type": 'application/json; charset=UTF-8',
@@ -159,8 +165,115 @@ class HttpUtil {
     return teams;
   }
 
-  // Future getCitiesFromServer() async{
-  //   return await
-  // }
+  static void postCurrentPlayers(CurrentPlaying currentPlaying, int matchId, String inningsType) async{
 
+    Map<String, dynamic> body = {
+      "currentBattingteamName" : currentPlaying.currentBattingteam.teamName,
+      "wickets": currentPlaying.wickets,
+      "bowlingTeamPlayer":currentPlaying.bowlingTeamPlayer,
+      "battingTeamPlayer" : currentPlaying.battingTeamPlayer,
+      "overs" : currentPlaying.overs,
+      "extra" : currentPlaying.extra,
+      "run" : currentPlaying.run,
+
+    };
+
+
+    http.Response response = await http.post(
+      Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/innings/"+inningsType+"/current-players/add",
+      headers: _header,
+      body: body);
+
+    if (response.statusCode == 200) {
+      //print(response.body);
+      //success message synced
+    }
+  }
+
+  static void postPlayerScore(Player player, int matchId, String inningsType) async{
+
+    Map<String, dynamic> body = {
+      "run": player.run,
+      "wicket":player.wicket,
+      "extra" : player.extra,
+      "overs" : player.overs,
+      "ballsFaced" : player.ballsFaced,
+      "runsGiven" : player.runsGiven,
+      "numberOfFours" : player.numberOfFours,
+      "numberOfsixes" : player.numberOfsixes,
+      "playedPosition" : player.playedPosition,
+      "out": player.out,
+      "onStrike": player.onStrike
+    };
+
+    http.Response response = await http.post(
+        Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/players/"+
+        player.uuid+"/addplayer",
+        headers: _header,
+        body: body);
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    }
+  }
+
+  static void postInnings(Inning inning, int matchId, String inningsType) async{
+
+    Map<String, dynamic> body = {
+      "matchId":matchId,
+      "inningtype":inningsType,
+      "battingTeamId" : inning.battingteam.teamId,
+      "bowlingTeamId" : inning.bowlingteam.teamId,
+      "run" : inning.run,
+      "wickets" : inning.wickets,
+      "overs" : inning.overs,
+      "extra" : inning.extra
+    };
+
+    http.Response response = await http.post(
+        Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/innings/"+inningsType+"/add",
+        headers: _header,
+        body: jsonEncode(body));
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    }
+  }
+
+  static void postMatchToServer(MatchGame matchGame) async{
+
+    MatchEntity entity = createMatchEntityObject(matchGame);
+    http.Response response = await http.post(
+        Constant.PROFILE_SERVICE_URL+"/match/add",
+    headers: _header,
+    body: jsonEncode(entity.toJson()));
+    if (response.statusCode == 200) {
+      matchGame.matchId = MatchGame.fromJson(json.decode(response.body)).matchId;
+    }
+  }
+
+  static MatchEntity createMatchEntityObject(MatchGame matchGame){
+    MatchEntity entity = MatchEntity();
+    entity.totalScore = matchGame.totalScore;
+    entity.tossWonTeamId = matchGame.tossWonTeam.teamId;
+    entity.winningTeam = (matchGame.winningTeam != null) ? matchGame.winningTeam.teamId : null;
+    entity.totalOvers = matchGame.totalOvers;
+    entity.selectedInning = matchGame.selectedInning;
+    entity.matchDateTime = DateTime.now();
+    entity.matchVenuecityId = matchGame.matchVenue.cityId;
+    entity.target = matchGame.target;
+    entity.teamAId = matchGame.teamA.teamId;
+    entity.teamBId = matchGame.teamB.teamId;
+    List<String> players = [];
+    matchGame.teamA.playerList.forEach((element) {
+      players.add(element.uuid);
+    });
+    entity.teamAplayers = players;
+    players = [];
+    matchGame.teamB.playerList.forEach((element) {
+      players.add(element.uuid);
+    });
+    entity.teamBplayers = players;
+    return entity;
+  }
 }

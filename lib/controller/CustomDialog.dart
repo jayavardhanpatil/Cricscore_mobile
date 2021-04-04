@@ -105,7 +105,7 @@ class CustomDialog extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
-                      if(matchGame.isLive) {
+                      if(matchGame.live) {
                         Navigator.push(context, MaterialPageRoute(builder: (
                             context) => SelectOpeners(batting: matchGame.firstInning.bowlingteam,
                             bowling: matchGame.firstInning.battingteam,

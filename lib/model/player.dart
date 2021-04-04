@@ -19,7 +19,7 @@ class Player{
   String email;
   String photoUrl;
 
-  bool isOnStrike = false;
+  bool onStrike = false;
   int run = 0;
   int wicket = 0;
   int extra = 0;
@@ -31,11 +31,11 @@ class Player{
   int centuries = 0;
   int fifties = 0;
   int playedPosition = 0;
-  bool isOut = false;
+  bool out = false;
 
   Player(){
-    this.isOut = false;
-    this.isOnStrike = false;
+    this.out = false;
+    this.onStrike = false;
   }
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);

@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/MatchGame.dart';
@@ -36,7 +37,8 @@ class _TossPage extends State<TossPage> {
   static const double padding = 20.0;
 
   initState(){
-    _listOfTeams = matchGame.teams.values.toList();
+    _listOfTeams.add(matchGame.teamA);
+    _listOfTeams.add(matchGame.teamB);
   }
 
   @override
@@ -193,6 +195,8 @@ class _TossPage extends State<TossPage> {
 
                     this.matchGame.tossWonTeam = _tossWonteam;
                     this.matchGame.selectedInning = selectedInning;
+
+                    HttpUtil.postMatchToServer(matchGame);
 
                     Navigator.push(context, MaterialPageRoute(builder: (context) =>(
                         SelectOpeners(batting: battingTeam, bowling: bowlingTeam, matchGame: this.matchGame,))));

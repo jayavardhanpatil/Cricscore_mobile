@@ -18,8 +18,6 @@ class Inning{
   int extra;
   Team battingteam;
   Team bowlingteam;
-  Map<String, Player> battingTeamPlayer;
-  Map<String, Player> bowlingTeamPlayer;
 
   Inning({Team batting, Team bowling}){
     this.run = 0;
@@ -28,8 +26,6 @@ class Inning{
     this.extra = 0;
     this.battingteam = batting;
     this.bowlingteam = bowling;
-    this.battingTeamPlayer = Map();
-    this.bowlingTeamPlayer = Map();
   }
 
   factory Inning.fromJson(Map<String, dynamic> json) => _$InningFromJson(json);

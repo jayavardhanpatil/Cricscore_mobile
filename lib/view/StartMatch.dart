@@ -46,8 +46,8 @@ class _StartMatch extends State<StartMatch>{
     // _oversController = new TextEditingController();typeAheadCityController = new TextEditingController();
     // _oversController = new TextEditingController();
 
-    matchGame.teams.putIfAbsent(_teamA.teamName, () => _teamA);
-    matchGame.teams.putIfAbsent(_teamB.teamName, () => _teamB);
+    matchGame.teamA = _teamA;
+    matchGame.teamB = _teamB;
 
     _width = MediaQuery
         .of(context)

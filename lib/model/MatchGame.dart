@@ -13,21 +13,23 @@ part 'MatchGame.g.dart';
 class MatchGame {
 
   int matchId;
-  Map<dynamic, Team> teams = new Map();
+  //Map<dynamic, Team> teams = new Map();
+  Team teamA;
+  Team teamB;
   City matchVenue;
   int totalOvers = 0;
   Team tossWonTeam;
   String selectedInning;
-  bool isFirstInningsOver = false;
+  bool firstInningsOver = false;
   int totalScore = 0;
   Inning firstInning;
   Inning secondInning;
   CurrentPlaying currentPlayers;
-  bool isLive = true;
+  bool live = true;
   String result;
   int target = 0;
   Team winningTeam;
-  bool isSecondInnignsStarted = false;
+  bool secondInnignsStarted = false;
 
   MatchGame();
 

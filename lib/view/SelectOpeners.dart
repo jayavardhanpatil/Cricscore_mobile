@@ -1,6 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/Innings.dart';
 import 'package:cricscore/model/MatchGame.dart';
@@ -166,14 +169,14 @@ class _SelectOpeners extends State<SelectOpeners>{
                     currentPlayer.currentBattingteam = batting;
                     playersRole.forEach((key, value) {
                         if(key == _STRIKER_KEY){
-                          value.playedPosition = 0;
-                          value.isOnStrike = true;
+                          value.playedPosition = 1;
+                          value.onStrike = true;
                           intializePlayerScocre(value);
                           //currentPlayer.battingTeamPlayer.putIfAbsent(key, () => value);
                           currentPlayer.battingTeamPlayer.putIfAbsent(value.uuid, () => value);
                         }else if(key == _NON_STRIKER_KEY){
-                          value.playedPosition = 1;
-                          value.isOnStrike = false;
+                          value.playedPosition = 2;
+                          value.onStrike = false;
                           intializePlayerScocre(value);
                           currentPlayer.battingTeamPlayer.putIfAbsent(value.uuid, () => value);
                           //currentPlayer.battingTeamPlayer.putIfAbsent(key, () => value);
@@ -184,7 +187,7 @@ class _SelectOpeners extends State<SelectOpeners>{
                         }
                       });
 
-                    if(!this.match.isFirstInningsOver){
+                    if(!this.match.firstInningsOver){
                       this.match.firstInning = initializeInning(batting, bowling);
                       this.match.secondInning = initializeInning(bowling, batting);
                     }else{
@@ -193,10 +196,19 @@ class _SelectOpeners extends State<SelectOpeners>{
                     }
 
                     this.match.currentPlayers = currentPlayer;
+                    print(json.encode(this.match.currentPlayers));
+                    HttpUtil.postCurrentPlayers(this.match.currentPlayers, this.match.matchId,
+                        (this.match.firstInningsOver) ? Constant.INNINGS[1] : Constant.INNINGS[0]);
 
-                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                      (UpdateScore(matchGame: match, batting: batting, bowling: bowling,))));
-                    }),
+                    HttpUtil.postInnings((this.match.firstInningsOver) ? this.match.secondInning : this.match.firstInning,
+                        this.match.matchId,
+                        (this.match.firstInningsOver) ? Constant.INNINGS[1] : Constant.INNINGS[0]);
+
+                    Navigator.pop(context);
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                    (UpdateScore(matchGame: match, batting: batting, bowling: bowling,))));
+                  }),
               ],
             ),
           ),
@@ -240,7 +252,7 @@ class _SelectOpeners extends State<SelectOpeners>{
     player.extra = 0;
     player.ballsFaced = 0;
     player.run = 0;
-    player.isOut = false;
+    player.out = false;
     player.runsGiven = 0;
     player.wicket = 0;
   }
@@ -253,12 +265,6 @@ class _SelectOpeners extends State<SelectOpeners>{
     inning.overs = 0;
     inning.wickets = 0;
     inning.bowlingteam = bowling;
-    batting.playerList.forEach((element) {
-      inning.battingTeamPlayer.update(element.uuid, (element) => intializePlayerScocre(element), ifAbsent: () => intializePlayerScocre(element) );
-    });
-    bowling.playerList.forEach((element) {
-      inning.bowlingTeamPlayer.update(element.uuid, (element) => intializePlayerScocre(element), ifAbsent: () => intializePlayerScocre(element) );
-    });
     return inning;
   }
 }

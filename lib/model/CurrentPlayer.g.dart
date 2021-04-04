@@ -10,9 +10,11 @@ CurrentPlaying _$CurrentPlayingFromJson(Map<String, dynamic> json) {
   return CurrentPlaying()
     ..run = json['run'] as int
     ..wickets = json['wickets'] as int
-    ..overs = json['overs']
+    ..overs = (json['overs'] as num)?.toDouble()
     ..extra = json['extra'] as int
-    ..currentBattingteam = json['teamName'] as Team
+    ..currentBattingteam = json['currentBattingteam'] == null
+        ? null
+        : Team.fromJson(json['currentBattingteam'] as Map<String, dynamic>)
     ..battingTeamPlayer =
         (json['battingTeamPlayer'] as Map<String, dynamic>)?.map(
       (k, e) => MapEntry(
@@ -31,7 +33,7 @@ Map<String, dynamic> _$CurrentPlayingToJson(CurrentPlaying instance) =>
       'wickets': instance.wickets,
       'overs': instance.overs,
       'extra': instance.extra,
-      'teamName': instance.currentBattingteam,
+      'currentBattingteam': instance.currentBattingteam,
       'battingTeamPlayer': instance.battingTeamPlayer,
       'bowlingTeamPlayer': instance.bowlingTeamPlayer,
     };

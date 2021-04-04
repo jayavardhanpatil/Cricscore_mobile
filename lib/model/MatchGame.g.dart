@@ -9,15 +9,21 @@ part of 'MatchGame.dart';
 MatchGame _$MatchGameFromJson(Map<String, dynamic> json) {
   return MatchGame()
     ..matchId = json['matchId'] as int
-    ..teams = (json['teams'] as Map<String, dynamic>)?.map(
-      (k, e) => MapEntry(
-          k, e == null ? null : Team.fromJson(e as Map<String, dynamic>)),
-    )
-    ..matchVenue = json['matchVenue'] as City
+    ..teamA = json['teamA'] == null
+        ? null
+        : Team.fromJson(json['teamA'] as Map<String, dynamic>)
+    ..teamB = json['teamB'] == null
+        ? null
+        : Team.fromJson(json['teamB'] as Map<String, dynamic>)
+    ..matchVenue = json['matchVenue'] == null
+        ? null
+        : City.fromJson(json['matchVenue'] as Map<String, dynamic>)
     ..totalOvers = json['totalOvers'] as int
-    ..tossWonTeam = json['tossWonTeam'] as Team
+    ..tossWonTeam = json['tossWonTeam'] == null
+        ? null
+        : Team.fromJson(json['tossWonTeam'] as Map<String, dynamic>)
     ..selectedInning = json['selectedInning'] as String
-    ..isFirstInningsOver = json['isFirstInningsOver'] as bool
+    ..firstInningsOver = json['firstInningsOver'] as bool
     ..totalScore = json['totalScore'] as int
     ..firstInning = json['firstInning'] == null
         ? null
@@ -29,28 +35,31 @@ MatchGame _$MatchGameFromJson(Map<String, dynamic> json) {
         ? null
         : CurrentPlaying.fromJson(
             json['currentPlayers'] as Map<String, dynamic>)
-    ..isLive = json['isLive'] as bool
+    ..live = json['live'] as bool
     ..result = json['result'] as String
     ..target = json['target'] as int
-    ..winningTeam = json['winningTeam'] as Team
-    ..isSecondInnignsStarted = json['isSecondInnignsStarted'] as bool;
+    ..winningTeam = json['winningTeam'] == null
+        ? null
+        : Team.fromJson(json['winningTeam'] as Map<String, dynamic>)
+    ..secondInnignsStarted = json['secondInnignsStarted'] as bool;
 }
 
 Map<String, dynamic> _$MatchGameToJson(MatchGame instance) => <String, dynamic>{
       'matchId': instance.matchId,
-      'teams': instance.teams,
+      'teamA': instance.teamA,
+      'teamB': instance.teamB,
       'matchVenue': instance.matchVenue,
       'totalOvers': instance.totalOvers,
       'tossWonTeam': instance.tossWonTeam,
       'selectedInning': instance.selectedInning,
-      'isFirstInningsOver': instance.isFirstInningsOver,
+      'firstInningsOver': instance.firstInningsOver,
       'totalScore': instance.totalScore,
       'firstInning': instance.firstInning,
       'secondInning': instance.secondInning,
       'currentPlayers': instance.currentPlayers,
-      'isLive': instance.isLive,
+      'live': instance.live,
       'result': instance.result,
       'target': instance.target,
       'winningTeam': instance.winningTeam,
-      'isSecondInnignsStarted': instance.isSecondInnignsStarted,
+      'secondInnignsStarted': instance.secondInnignsStarted,
     };
