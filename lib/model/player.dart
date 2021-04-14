@@ -36,6 +36,8 @@ class Player{
   Player(){
     this.out = false;
     this.onStrike = false;
+    this.numberOfFours = 0;
+    this.numberOfsixes = 0;
   }
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);

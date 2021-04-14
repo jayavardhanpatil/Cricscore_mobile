@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/controller/CustomDialog.dart';
 import 'package:cricscore/controller/HTTPUtil.dart';
+import 'package:cricscore/controller/database_service.dart';
 import 'package:cricscore/model/Innings.dart';
 import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/Team.dart';
@@ -357,10 +358,10 @@ class _UpdateScore extends State<UpdateScore> {
                   //SyncCurrentPlayersWithInnings("secondInnings");
                 }
               }
-              matchGame.currentPlayers.run = 0;
-              matchGame.currentPlayers.wickets = 0;
-              matchGame.currentPlayers.overs = 0;
-              matchGame.currentPlayers.extra = 0;
+              // matchGame.currentPlayers.run = 0;
+              // matchGame.currentPlayers.wickets = 0;
+              // matchGame.currentPlayers.overs = 0;
+              // matchGame.currentPlayers.extra = 0;
             } else {
               if (isMatchOver()) {
                 //syncCurrentScoreWithInnings();
@@ -615,7 +616,7 @@ class _UpdateScore extends State<UpdateScore> {
 
     currentBattingPlayer[onStrikeIndex].out = true;
     //Now replace the batsman
-    HttpUtil.postPlayerScore(currentBattingPlayer[onStrikeIndex], matchGame.matchId, this.inningsType);
+    HttpUtil.postBattingPlayerScore(currentBattingPlayer[onStrikeIndex], matchGame.matchId, this.inningsType);
     setState(() {
       matchGame.currentPlayers.battingTeamPlayer
           .remove(currentBattingPlayer[onStrikeIndex].uuid);
@@ -632,6 +633,7 @@ class _UpdateScore extends State<UpdateScore> {
     HttpUtil.postCurrentPlayers(matchGame.currentPlayers, matchGame.matchId, this.inningsType);
     HttpUtil.postInnings((matchGame.firstInningsOver)? matchGame.secondInning : matchGame.firstInning,
         matchGame.matchId, this.inningsType);
+    DatabaseService.addMatchSummary(matchGame);
   }
 
   void updateScoreForStriker(int run) {
@@ -653,7 +655,8 @@ class _UpdateScore extends State<UpdateScore> {
       } else {
         bowlers.addAll(matchGame.firstInning.bowlingteam.playerList);
       }
-
+      HttpUtil.postBowlingPlayerScore(currentBowlingPlayer[0],
+          matchGame.matchId, (matchGame.firstInningsOver) ? Constant.INNINGS[1] : Constant.INNINGS[0]);
       bowlers.remove(currentBowlingPlayer[0]);
       getSelectedPlayer(context, bowlers, "bowler")
           .then((value) => {if (value != null) replaceBowler(value)});
@@ -662,13 +665,9 @@ class _UpdateScore extends State<UpdateScore> {
 
   Future replaceBowler(Player player) {
     if (matchGame.firstInningsOver) {
-      //   DatabaseService().updatePlayer(
-      //       match, _currentBowlingPlayer[0], "bowling_team",
-      //       "secondInnings");
-      // }else{
-      //   DatabaseService().updatePlayer(
-      //       match, _currentBowlingPlayer[0], "bowling_team",
-      //       "firstInnings");
+        HttpUtil.postBowlingPlayerScore(player, matchGame.matchId, Constant.INNINGS[1]);
+      }else{
+        HttpUtil.postBowlingPlayerScore(player, matchGame.matchId, Constant.INNINGS[0]);
     }
     setState(() {
       balls.clear();
@@ -747,6 +746,9 @@ class _UpdateScore extends State<UpdateScore> {
   }
 
   bool isMatchOver() {
+
+    bool isMatchOver = false;
+
     if(matchGame.firstInningsOver){
 
       if(matchGame.currentPlayers.overs >= matchGame.totalOvers){
@@ -755,7 +757,7 @@ class _UpdateScore extends State<UpdateScore> {
           print(matchGame.winningTeam.teamName + " won by "+(matchGame.firstInning.run - matchGame.currentPlayers.run).toString() + " runs");
           matchGame.result = matchGame.winningTeam.teamName + " won by "+(matchGame.firstInning.run - matchGame.currentPlayers.run).toString() + " runs";
           matchGame.live = false;
-          return true;
+          isMatchOver = true;
         }
       }
       else if(matchGame.currentPlayers.run > matchGame.firstInning.run){
@@ -763,15 +765,20 @@ class _UpdateScore extends State<UpdateScore> {
         print(matchGame.winningTeam.teamName + " won by "+(matchGame.secondInning.battingteam.playerList.length - matchGame.currentPlayers.wickets).toString() + " wickets");
         matchGame.result = matchGame.winningTeam.teamName + " won by "+(matchGame.secondInning.battingteam.playerList.length - matchGame.currentPlayers.wickets).toString() + " wickets";
         matchGame.live = false;
-        return true;
+        isMatchOver = true;
       }else if( matchGame.currentPlayers.wickets == matchGame.secondInning.battingteam.playerList.length-1){
         matchGame.winningTeam = matchGame.firstInning.battingteam;
         print(matchGame.winningTeam.teamName + " team won by "+(matchGame.firstInning.run - matchGame.currentPlayers.run).toString() + " runs");
         matchGame.result = matchGame.winningTeam.teamName + " team won by "+(matchGame.firstInning.run - matchGame.currentPlayers.run).toString() + " runs";
         matchGame.live = false;
-        return true;
+        isMatchOver = true;
       }
     }
-    return false;
+
+    if(isMatchOver){
+      HttpUtil.postInnings(matchGame.secondInning, matchGame.matchId, Constant.INNINGS[1]);
+      HttpUtil.updateMatchResult(matchGame.matchId, matchGame);
+    }
+    return isMatchOver;
   }
 }

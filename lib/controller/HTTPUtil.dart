@@ -7,6 +7,7 @@ import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/Innings.dart';
 import 'package:cricscore/model/MatchEntity.dart';
 import 'package:cricscore/model/MatchGame.dart';
+import 'package:cricscore/model/MatchSummary.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,11 @@ import '../Constants.dart';
 
 class HttpUtil {
 
+  Timer timer;
+
   static String _url = "https://jsonplaceholder.typicode.com/users";
+
+  StreamController<MatchSummary> streamController = StreamController();
 
   static Map<String, String> _header = {
     "Content-Type": 'application/json; charset=UTF-8',
@@ -175,30 +180,25 @@ class HttpUtil {
       "overs" : currentPlaying.overs,
       "extra" : currentPlaying.extra,
       "run" : currentPlaying.run,
-
     };
 
+    print("Body Update score :" + jsonEncode(body));
 
     http.Response response = await http.post(
       Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/innings/"+inningsType+"/current-players/add",
       headers: _header,
-      body: body);
+      body: jsonEncode(body));
 
     if (response.statusCode == 200) {
-      //print(response.body);
+      print("Players : " + response.body);
       //success message synced
     }
   }
 
-  static void postPlayerScore(Player player, int matchId, String inningsType) async{
-
+  static void postBattingPlayerScore(Player player, int matchId, String inningsType) async{
     Map<String, dynamic> body = {
       "run": player.run,
-      "wicket":player.wicket,
-      "extra" : player.extra,
-      "overs" : player.overs,
       "ballsFaced" : player.ballsFaced,
-      "runsGiven" : player.runsGiven,
       "numberOfFours" : player.numberOfFours,
       "numberOfsixes" : player.numberOfsixes,
       "playedPosition" : player.playedPosition,
@@ -206,11 +206,31 @@ class HttpUtil {
       "onStrike": player.onStrike
     };
 
-    http.Response response = await http.post(
+    http.Response response = await http.put(
         Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/players/"+
-        player.uuid+"/addplayer",
+        player.uuid+"/updateBattingScore",
         headers: _header,
-        body: body);
+        body: jsonEncode(body));
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    }
+  }
+
+  static void postBowlingPlayerScore(Player player, int matchId, String inningsType) async{
+    Map<String, dynamic> body = {
+
+      "wicket":player.wicket,
+      "extra" : player.extra,
+      "overs" : player.overs,
+      "runsGiven" : player.runsGiven
+    };
+
+    http.Response response = await http.put(
+        Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString()+"/players/"+
+            player.uuid+"/updateBowlingScore",
+        headers: _header,
+        body: jsonEncode(body));
 
     if (response.statusCode == 200) {
       print(response.body);
@@ -236,7 +256,7 @@ class HttpUtil {
         body: jsonEncode(body));
 
     if (response.statusCode == 200) {
-      print(response.body);
+      print("Innings Response" + response.body);
     }
   }
 
@@ -275,5 +295,42 @@ class HttpUtil {
     });
     entity.teamBplayers = players;
     return entity;
+  }
+
+  static void updateMatchResult(int matchId, MatchGame matchGame) async {
+
+    Map<String, dynamic> body = {
+      "totalScore":matchGame.target,
+      "result":matchGame.result,
+      "winningTeamId" : matchGame.winningTeam.teamId,
+      "matchVenuecityId" : matchGame.matchVenue.cityId
+    };
+
+    http.Response response = await http.put(
+        Constant.PROFILE_SERVICE_URL+"/match/"+matchId.toString(),
+        headers: _header,
+        body: jsonEncode(body));
+  }
+
+  static Future<List<MatchSummary>> getMatchSummary(String cityId) async {
+    List<MatchSummary> matchSummary = [];
+
+    var header = _header;
+
+    final response = await http.get(
+        Constant.PROFILE_SERVICE_URL + "/matches/cities/"+cityId+"/",
+        headers: header
+    );
+
+    print("response");
+    print(response);
+    print(jsonEncode(response.body));
+
+    if (response.statusCode == 200) {
+      Iterable l = json.decode(response.body);
+      matchSummary = List<MatchSummary>.from(l.map((model) => MatchSummary.fromJson(model)));
+    }
+    print(jsonEncode(matchSummary));
+    return matchSummary;
   }
 }

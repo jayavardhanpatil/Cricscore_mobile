@@ -1,9 +1,15 @@
 
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
+import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
+import 'package:cricscore/controller/database_service.dart';
 import 'package:cricscore/model/City.dart';
+import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/MatchGame.dart';
+import 'package:cricscore/model/MatchSummary.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/view/Teams.dart';
@@ -11,20 +17,20 @@ import 'package:cricscore/widget/Loader.dart';
 import 'package:cricscore/widget/RowBoxDecoration.dart';
 import 'package:flutter/material.dart';
 
-class MatchSummary extends StatefulWidget{
+class MatchSummaryPage extends StatefulWidget{
 
   _MatchSummary createState() => _MatchSummary();
 
 }
 
-class _MatchSummary extends State<MatchSummary>{
+class _MatchSummary extends State<MatchSummaryPage>{
 
 
   String usercity;
   Future matches;
   MatchGame game;
   bool loading = true;
-  List<MatchGame> _matches = [];
+  List<MatchSummary> _matches = [];
   List<Player> batsmansplayers;
   List<Player> bowler;
 
@@ -47,7 +53,24 @@ class _MatchSummary extends State<MatchSummary>{
         child : Container(
           child: Column(
             children: <Widget>[
-              matchListView(context),
+              RaisedButton(
+                  color: Constant.PRIMARY_COLOR,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)),
+                  child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                      child: AutoSizeText(
+                        "Test",
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      )
+                  ),
+                  onPressed: () {
+                    //HttpUtil.getMatchSummary("44");
+                  }),
+             // matchListView(context),
             ],
           ),
         ),
@@ -60,7 +83,6 @@ class _MatchSummary extends State<MatchSummary>{
   }
 
   Widget matchListView(BuildContext context) {
-
     return FutureBuilder(
         future: matches,
         builder: (context, snapshot){
@@ -112,7 +134,7 @@ class _MatchSummary extends State<MatchSummary>{
             );
           }
           }else{
-            return null;
+            return Text("No data");
           }
         },
     );
@@ -130,14 +152,15 @@ class _MatchSummary extends State<MatchSummary>{
     );
   }
 
-  Widget updateGameData(MatchGame matchGame){
-    return StreamBuilder<MatchGame>(
+  Widget updateGameData(MatchSummary matchSummary){
+    return StreamBuilder<MatchSummary>(
       //stream: ,
       builder: (context, snapshot){
         if(snapshot.hasData){
-          matchGame = snapshot.data;
-          batsmansplayers = matchGame.currentPlayers.battingTeamPlayer.values.toList();
-          bowler = matchGame.currentPlayers.bowlingTeamPlayer.values.toList();
+          matchSummary = snapshot.data;
+          CurrentPlaying currentScore = (matchSummary.firstInningsOver) ? matchSummary.secondInningsScore : matchSummary.firstInningsScore;
+          batsmansplayers = currentScore.battingTeamPlayer.values.toList();
+          bowler = currentScore.bowlingTeamPlayer.values.toList();
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -148,22 +171,17 @@ class _MatchSummary extends State<MatchSummary>{
                     padding: EdgeInsets.all(5),
 
                     child: AutoSizeText(
-                      matchGame.teamA.teamName + " - " + matchGame.teamB.teamName,
+                      matchSummary.matchTitile,
                       maxLines: 1,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 25, fontFamily: 'Literata',
                         //color: Color(0xFF75A2EA),
                       ),
-
-
-//                    child : Text(matchGame.getMatchTitle().substring(0, matchGame.getMatchTitle().lastIndexOf(" - ")), textAlign: TextAlign.center, style: TextStyle(
-//                      fontWeight: FontWeight.bold, fontSize: 25 ,fontFamily: 'Bitter bold', fontStyle: FontStyle.italic,
-//                    ),),
                     ),
                   ),
 
-                  if (matchGame.live) Container(
+                  if (matchSummary.live) Container(
                     alignment: Alignment.topRight,
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
@@ -177,14 +195,6 @@ class _MatchSummary extends State<MatchSummary>{
                 ],
               ),
 
-//              Container(
-//                alignment: Alignment.topRight,
-//                padding: EdgeInsets.only(top: 10, right: 10),
-//                child : Text(_matches[index].getMatchTitle().substring(_matches[index].getMatchTitle().lastIndexOf(" - ")+3), textAlign: TextAlign.center,style: TextStyle(
-//                  fontSize: 15,
-//                ),),
-//              ),
-
               Container(
                 child: Row(
                   children: <Widget>[
@@ -195,7 +205,7 @@ class _MatchSummary extends State<MatchSummary>{
                           Container(
                             padding: EdgeInsets.only(left: 5),
                             child: AutoSizeText(
-                              matchGame.firstInning.battingteam.teamName,
+                              matchSummary.firstBattingTeamName,
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               style : TextStyle(
@@ -203,40 +213,27 @@ class _MatchSummary extends State<MatchSummary>{
                               ),
                             ),
 
-//                            child: Text(matchGame.firstInning.battingteam.getTeamName(), textAlign: TextAlign.center, style : TextStyle(
-//                              fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'ERGaramond italic', fontStyle: FontStyle.italic,
-//                            ),),
                             margin: EdgeInsets.all(5),
                           ),
                           Container(
                             padding: EdgeInsets.only(left: 5),
 
                             child: AutoSizeText(
-                              (matchGame.firstInningsOver) ? matchGame.firstInning.run.toString() + "/" + matchGame.firstInning.wickets.toString()
-                                  : matchGame.currentPlayers.run.toString() + "/" + matchGame.currentPlayers.wickets.toString(),
+                              (matchSummary.firstInningsOver) ? matchSummary.firstInningsScore.run.toString() + "/" + matchSummary.firstInningsScore.wickets.toString()
+                                  : matchSummary.secondInningsScore.run.toString() + "/" + matchSummary.secondInningsScore.wickets.toString(),
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 40, fontWeight: FontWeight.bold, fontFamily: 'Oswaldd',
                               ),
                             ),
-
-
-//                            child: Text(
-//                              (matchGame.isFirstInningsOver) ? matchGame.firstInning.run.toString() + "/" + matchGame.firstInning.wickets.toString()
-//                                  : matchGame.currentPlayers.run.toString() + "/" + matchGame.currentPlayers.wickets.toString(),
-//                              style: TextStyle(
-//                                fontSize: 45, fontWeight: FontWeight.bold, fontFamily: 'ERGaramond',
-//                              ),
-//
-//                            ),
                           ),
                         ],
                       ),
                     ),
 
                     Container(
-                      decoration: (matchGame.live) ? getButtonGradientColor(BoxShape.circle) :
+                      decoration: (matchSummary.live) ? getButtonGradientColor(BoxShape.circle) :
                       BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color.fromRGBO(255, 255, 255, 0.0),
@@ -259,7 +256,7 @@ class _MatchSummary extends State<MatchSummary>{
                             padding: EdgeInsets.only(left: 5),
 
                             child: AutoSizeText(
-                              matchGame.secondInning.battingteam.teamName,
+                              matchSummary.secondInningsTramName,
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               style : TextStyle(
@@ -275,8 +272,8 @@ class _MatchSummary extends State<MatchSummary>{
                           Container(
 
                             child: AutoSizeText(
-                              (matchGame.firstInningsOver && matchGame.live) ? matchGame.currentPlayers.run.toString() + "/" + matchGame.currentPlayers.wickets.toString()
-                                  : matchGame.secondInning.run.toString() + "/" + matchGame.secondInning.wickets.toString(),
+                              (matchSummary.firstInningsOver && matchSummary.live) ? matchSummary.secondInningsScore.run.toString() + "/" + matchSummary.secondInningsScore.wickets.toString()
+                                  : matchSummary.firstInningsScore.run.toString() + "/" + matchSummary.firstInningsScore.wickets.toString(),
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -409,8 +406,8 @@ class _MatchSummary extends State<MatchSummary>{
                 alignment: Alignment.topLeft,
                 margin: EdgeInsets.only(left: 30),
                 child:  AutoSizeText(
-                  (!matchGame.live) ? "Result :     " + matchGame.result :
-                  (matchGame.firstInningsOver) ? "Target :     "+matchGame.target.toString() : "",
+                  (!matchSummary.live) ? "Result :     " + matchSummary.result :
+                  (matchSummary.firstInningsOver) ? "Target :     "+matchSummary.target.toString() : "",
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -430,7 +427,21 @@ class _MatchSummary extends State<MatchSummary>{
   }
 
 
+
   String getMatchBetween(List<Team> teams){
     return teams.first.teamName + " - " + teams.last.teamName;
+  }
+
+  StreamController<String> streamController = StreamController();
+
+  void newMessage(int number, String message) {
+    final duration = Duration(seconds: number);
+    Timer.periodic(duration, (Timer t) => streamController.add(message));
+  }
+
+
+  void dispose() {
+    streamController.close();
+    super.dispose();
   }
 }

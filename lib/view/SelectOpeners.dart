@@ -48,6 +48,13 @@ class _SelectOpeners extends State<SelectOpeners>{
   void initState() {
     battingPlayers = batting.playerList;
     bowlingPlayers = bowling.playerList;
+    battingPlayers.forEach((element) {
+      intializePlayerScocre(element);
+    });
+
+    bowlingPlayers.forEach((element) {
+      intializePlayerScocre(element);
+    });
     super.initState();
   }
 
@@ -255,6 +262,10 @@ class _SelectOpeners extends State<SelectOpeners>{
     player.out = false;
     player.runsGiven = 0;
     player.wicket = 0;
+    player.numberOfsixes = 0;
+    player.numberOfFours = 0;
+    player.playedPosition = 0;
+    player.onStrike = false;
   }
 
   Inning initializeInning(Team batting, Team bowling){

@@ -136,14 +136,6 @@ class _SelectTeams extends State<SelectTeam> {
 
                     Navigator.push(context, MaterialPageRoute(builder: (context) =>(StartMatch(matchGame: this.matchgame))));
 
-                    // print(this._typeFirstAheadTeamController.text);
-                    // print(this._typeFirstAheadCityController.text);
-                    // print(this._typeSecondAheadTeamController.text);
-                    // print(this._typeSecondAheadCityController.text);
-                    //
-                    // print(teamA.toJson());
-                    // print(teamB.toJson());
-
                   },
                 ),
 

@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -522,16 +521,17 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
     } else {
       otherTeamName = Team.fromJson(SharedPrefUtil.getObject(Constant.TEAM_B)).teamName;
     }
-
-    var players = await SharedPrefUtil.getObject(
-        otherTeamName + "_" + Constant.SELECTED_PLAYERS);
-    if (players == null) {
-      _otherTeamselectedPlayers = new Map();
-    } else {
-      players.forEach((key, value) {
-        _otherTeamselectedPlayers.putIfAbsent(
-            key, () => Player.fromJson(value));
-      });
+    if(otherTeamName != null) {
+      var players = await SharedPrefUtil.getObject(
+          otherTeamName + "_" + Constant.SELECTED_PLAYERS);
+      if (players == null) {
+        _otherTeamselectedPlayers = new Map();
+      } else {
+        players.forEach((key, value) {
+          _otherTeamselectedPlayers.putIfAbsent(
+              key, () => Player.fromJson(value));
+        });
+      }
     }
     setState(() {
       _isLoadComplete = true;

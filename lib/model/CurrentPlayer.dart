@@ -20,7 +20,5 @@ class CurrentPlaying{
 
   Map<String, dynamic> toJson() => _$CurrentPlayingToJson(this);
 
-  CurrentPlaying({Team team}){
-    this.currentBattingteam = team;
-  }
+  CurrentPlaying(){}
 }
