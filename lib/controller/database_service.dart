@@ -5,7 +5,7 @@ import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/MatchSummary.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseService {
 
@@ -19,10 +19,14 @@ class DatabaseService {
   static final DatabaseReference _fireBaseRTreference = FirebaseDatabase.instance
       .reference();
 
+  static final String date = new DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-  static Future addMatchSummary(MatchGame game) async{
+  static Future addMatchSummary(MatchGame game) async {
     MatchSummary match = new MatchSummary();
-    int  cityId = game.matchVenue.cityId;
+
+    Map<String, dynamic> updateInningsParameters = {};
+
+    int cityId = game.matchVenue.cityId;
     CurrentPlaying currentPlaying = new CurrentPlaying();
     currentPlaying.battingTeamPlayer = game.currentPlayers.battingTeamPlayer;
     currentPlaying.bowlingTeamPlayer = game.currentPlayers.bowlingTeamPlayer;
@@ -30,41 +34,61 @@ class DatabaseService {
     currentPlaying.extra = game.currentPlayers.extra;
     currentPlaying.wickets = game.currentPlayers.wickets;
     currentPlaying.overs = game.currentPlayers.overs;
-
-    if(game.live && game.firstInningsOver)
-      match.secondInningsScore = currentPlaying;
-    else{
-      match.firstInningsScore = currentPlaying;
-    }
     match.live = game.live;
     match.firstInningsOver = game.firstInningsOver;
-    match.matchTitile  = game.teamA.teamName + "-" + game.teamB.teamName;
-    match.firstBattingTeamName = game.firstInning.battingteam.teamName;
-    match.result = game.result;
-    match.target = game.target;
+    match.matchTitile = game.teamA.teamName+"-"+game.teamB.teamName;
 
-    print("Match Title : "+match.matchTitile);
-    print(jsonEncode(match.toJson()));
+    if(game.firstInningsOver && !game.secondInnignsStarted){
+      updateInningsParameters = {
+        "firstInningsOver" : game.firstInningsOver,
+        "target" : game.target,
+        "firstInningsScore" : jsonDecode(jsonEncode(currentPlaying))
+      };
+      updateInnings(updateInningsParameters, cityId, match.matchTitile);
+    }
+    if (game.secondInnignsStarted) {
+        updateInningsParameters = {
+          "secondInningsScore" : jsonDecode(jsonEncode(currentPlaying))
+        };
+        //updateCurrentPlayer(match.matchTitile, currentPlaying, game.matchVenue.cityId, false);
+      } else {
+        updateInningsParameters = {
+          "firstInningsScore" : jsonDecode(jsonEncode(currentPlaying))
+        };
+        //updateCurrentPlayer(match.matchTitile, currentPlaying, game.matchVenue.cityId, true);
+      }
+      match.live = game.live;
+      if(!match.live) {
+        updateInningsParameters = {
+          "live": game.live,
+          "result": game.result,
+          "secondInningsScore" : jsonDecode(jsonEncode(currentPlaying))
+        };
+      }
+
+    updateInnings(updateInningsParameters, cityId, match.matchTitile);
+  }
+
+  static Future updateInnings(Map<String, dynamic> match, int cityId, String matchTitle) async {
     return await _fireBaseRTreference.child("matches")
-        .child(cityId.toString()).child(match.matchTitile).set(jsonDecode(jsonEncode(match.toJson())))
+        .child(cityId.toString()).child(matchTitle +"-"+date).update(match)
         .then((value) => print("Added match Detail"))
         .catchError((e){
       print("Error : in adding match details"+e.toString());
     });
   }
 
-  Future updateCurrentPlayer(MatchSummary matchSummary, int cityId) async{
-    return await _fireBaseRTreference.child("matches")
-        .child(cityId.toString())
-        .child(matchSummary.matchTitile)
-        .child("currentPlayers")
-        .set(matchSummary.toJson()).then((value) =>
-        print("Player Current Updated")).catchError((e){
-      print("Error in updating user : "+e.toString());
-    });
-  }
-
-
+  // static Future updateCurrentPlayer(String matchTitle, CurrentPlaying currentPlaying, int cityId, bool isFirstInnings) async{
+  //   String inningsType = (isFirstInnings) ? "firstInningsScore" : "secondInningsScore";
+  //   return await _fireBaseRTreference.child("matches")
+  //       .child(cityId.toString())
+  //       .child(matchTitle+"-"+date)
+  //       .child(inningsType)
+  //       .set(currentPlaying.toJson()).then((value) =>
+  //       print("Player Current Updated")).catchError((e){
+  //     print("Error in updating user : "+e.toString());
+  //   });
+  // }
 
 //  addMatchDetail(MatchGame match) async{
 //    print(match.toJson());
@@ -75,15 +99,33 @@ class DatabaseService {
 //  }
 
 
-  Stream<MatchSummary> gameStreamData(String matchVenue, String matchTitle) {
+  static Stream<MatchSummary> gameStreamData(String matchVenue, String matchTitle) {
     return _fireBaseRTreference.child("matches")
         .child(matchVenue)
-        .child(matchTitle)
+        .child(matchTitle+"-"+date)
         .onValue.map(_mapTOMatchGame);
   }
 
-  MatchSummary _mapTOMatchGame(dynamic gameData){
-    MatchSummary game = MatchSummary.fromJson(gameData.snapshot.value);
+  static MatchSummary _mapTOMatchGame(dynamic gameData){
+    MatchSummary game = MatchSummary.fromJson(json.decode(json.encode(gameData.snapshot.value)));
     return game;
+  }
+
+  Future<List<MatchSummary>> getListOfMatches(String city) async{
+    List<MatchSummary> listOfMatches = [];
+    return await _fireBaseRTreference.child("matches").child(city).once().then((value) {
+      value.value.forEach((k, v) {
+        Map<String, dynamic> map = json.decode(json.encode(v));
+        MatchSummary matchGame = MatchSummary.fromJson(map);
+        if(matchGame.firstInningsScore != null || matchGame.secondInningsScore != null) {
+          //if (matchGame.live)
+            listOfMatches.insert(0, matchGame);
+        }
+      });
+      return listOfMatches;
+    }).catchError((e){
+      print("error in fetching match data " + e);
+      return listOfMatches;
+    });
   }
 }

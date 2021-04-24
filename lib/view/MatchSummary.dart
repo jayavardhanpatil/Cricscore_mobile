@@ -13,6 +13,7 @@ import 'package:cricscore/model/MatchSummary.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:cricscore/view/Teams.dart';
+import 'package:cricscore/view/matchScoreCard.dart';
 import 'package:cricscore/widget/Loader.dart';
 import 'package:cricscore/widget/RowBoxDecoration.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,12 @@ class MatchSummaryPage extends StatefulWidget{
 class _MatchSummary extends State<MatchSummaryPage>{
 
 
-  String usercity;
+  static int firstInningsScore;
+  static int firstInningsWickets;
+  static int secondInningsScore;
+  static int secondInningsWickets;
+
+  String usercityId;
   Future matches;
   MatchGame game;
   bool loading = true;
@@ -37,9 +43,12 @@ class _MatchSummary extends State<MatchSummaryPage>{
   @override
   void initState() {
     Player player = Player.fromJson(SharedPrefUtil.getObject(Constant.PROFILE_KEY));
-    usercity = player.city.cityName;
-
+    usercityId = player.city.cityId.toString();
     matches = getMatches();
+    firstInningsScore = 0;
+    firstInningsWickets = 0;
+    secondInningsScore = 0;
+    secondInningsWickets = 0;
     super.initState();
   }
 
@@ -53,24 +62,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
         child : Container(
           child: Column(
             children: <Widget>[
-              RaisedButton(
-                  color: Constant.PRIMARY_COLOR,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0)),
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                      child: AutoSizeText(
-                        "Test",
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      )
-                  ),
-                  onPressed: () {
-                    //HttpUtil.getMatchSummary("44");
-                  }),
-             // matchListView(context),
+              matchListView(context),
             ],
           ),
         ),
@@ -78,8 +70,8 @@ class _MatchSummary extends State<MatchSummaryPage>{
     );
   }
 
-  Future getMatches() {
-
+  Future getMatches() async{
+    return await DatabaseService().getListOfMatches(usercityId);
   }
 
   Widget matchListView(BuildContext context) {
@@ -143,21 +135,44 @@ class _MatchSummary extends State<MatchSummaryPage>{
   Widget getCardList(BuildContext context, index){
     return Container(
       height: 250,
-      child: Card(
-        elevation: 10,
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-        color : (_matches[index].live) ? null : Color.fromRGBO(255, 255, 255, 0.2),
-        child: (_matches[index] != null ) ? updateGameData(_matches[index]) : Container(),
-      ),
+      child: GestureDetector(
+        onTap: () => {
+          Navigator.push(context,
+            MaterialPageRoute(builder: (context) => MatchScoreCardView(summary: _matches[index])))
+        },
+        child: Card(
+          elevation: 10,
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+          color : (_matches[index].live) ? null : Color.fromRGBO(255, 255, 255, 0.2),
+          child: (_matches[index] != null ) ? updateGameData(_matches[index]) : Container(),
+        )
+      )
     );
   }
 
   Widget updateGameData(MatchSummary matchSummary){
     return StreamBuilder<MatchSummary>(
-      //stream: ,
+      stream: DatabaseService.gameStreamData(usercityId, matchSummary.matchTitile),
       builder: (context, snapshot){
         if(snapshot.hasData){
           matchSummary = snapshot.data;
+          // setState(() {
+          //   if(matchSummary.firstInningsOver){
+          //     secondInningsScore = matchSummary.secondInningsScore.run;
+          //     secondInningsWickets = matchSummary.secondInningsScore.wickets;
+          //   }else{
+          //     firstInningsScore = matchSummary.firstInningsScore.run;
+          //     firstInningsWickets = matchSummary.firstInningsScore.wickets;
+          //   }
+          // });
+          if(matchSummary.secondInningsScore == null){
+            matchSummary.secondInningsScore = new CurrentPlaying();
+            (matchSummary.secondInningsScore.overs == null) ? matchSummary.secondInningsScore.overs : 0.0;
+            (matchSummary.secondInningsScore.run == null) ? matchSummary.secondInningsScore.run : 0;
+            (matchSummary.secondInningsScore.wickets == null) ? matchSummary.secondInningsScore.wickets : 0;
+            (matchSummary.secondInningsScore.extra == null )?matchSummary.secondInningsScore.extra : 0;
+          }
+
           CurrentPlaying currentScore = (matchSummary.firstInningsOver) ? matchSummary.secondInningsScore : matchSummary.firstInningsScore;
           batsmansplayers = currentScore.battingTeamPlayer.values.toList();
           bowler = currentScore.bowlingTeamPlayer.values.toList();
@@ -183,6 +198,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
 
                   if (matchSummary.live) Container(
                     alignment: Alignment.topRight,
+                    margin: EdgeInsets.only(left: 10),
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(5),
@@ -191,6 +207,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
                     padding: EdgeInsets.all(5),
                     child : Text("Live", textAlign: TextAlign.center,style: TextStyle(fontSize: 10,
                     ),),
+                  // ignore: sdk_version_ui_as_code
                   ) else Container(),
                 ],
               ),
@@ -220,7 +237,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
 
                             child: AutoSizeText(
                               (matchSummary.firstInningsOver) ? matchSummary.firstInningsScore.run.toString() + "/" + matchSummary.firstInningsScore.wickets.toString()
-                                  : matchSummary.secondInningsScore.run.toString() + "/" + matchSummary.secondInningsScore.wickets.toString(),
+                                  : currentScore.run.toString() + "/" + currentScore.wickets.toString(),
                               maxLines: 1,
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -256,7 +273,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
                             padding: EdgeInsets.only(left: 5),
 
                             child: AutoSizeText(
-                              matchSummary.secondInningsTramName,
+                              matchSummary.secondInningsTeamName,
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               style : TextStyle(
@@ -272,8 +289,8 @@ class _MatchSummary extends State<MatchSummaryPage>{
                           Container(
 
                             child: AutoSizeText(
-                              (matchSummary.firstInningsOver && matchSummary.live) ? matchSummary.secondInningsScore.run.toString() + "/" + matchSummary.secondInningsScore.wickets.toString()
-                                  : matchSummary.firstInningsScore.run.toString() + "/" + matchSummary.firstInningsScore.wickets.toString(),
+                              (matchSummary.firstInningsOver && matchSummary.live) ? currentScore.run.toString() + "/" + currentScore.wickets.toString()
+                                  : matchSummary.secondInningsScore.run.toString() + "/" + matchSummary.secondInningsScore.wickets.toString(),
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -290,8 +307,9 @@ class _MatchSummary extends State<MatchSummaryPage>{
 
               SizedBox(height: 10,),
 
-              Container(
+              (batsmansplayers.length == 0) ? new Container() :
 
+              Container(
                   margin: EdgeInsets.only(left: 30),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -358,6 +376,8 @@ class _MatchSummary extends State<MatchSummaryPage>{
                     ],
                   )
               ),
+
+              (bowler.length == 0) ? new Container() :
 
               Container(
                   margin: EdgeInsets.only(left: 30),
@@ -426,22 +446,8 @@ class _MatchSummary extends State<MatchSummaryPage>{
     );
   }
 
-
-
   String getMatchBetween(List<Team> teams){
     return teams.first.teamName + " - " + teams.last.teamName;
   }
 
-  StreamController<String> streamController = StreamController();
-
-  void newMessage(int number, String message) {
-    final duration = Duration(seconds: number);
-    Timer.periodic(duration, (Timer t) => streamController.add(message));
-  }
-
-
-  void dispose() {
-    streamController.close();
-    super.dispose();
-  }
 }

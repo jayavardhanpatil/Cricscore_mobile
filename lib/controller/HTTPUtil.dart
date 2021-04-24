@@ -9,6 +9,7 @@ import 'package:cricscore/model/MatchEntity.dart';
 import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/MatchSummary.dart';
 import 'package:cricscore/model/Team.dart';
+import 'package:cricscore/model/matchScoreCard.dart';
 import 'package:cricscore/model/player.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -156,16 +157,17 @@ class HttpUtil {
     return players;
   }
 
-  static Future<List<Team>> addteam(Team team) async{
-    List<Team> teams = [];
+  static Future<Team> addteam(Team team) async{
+    Team teams = new Team();
+
+    print("Adding Team data : "+json.encode(team));
+
     final response = await http.post(
       Constant.PROFILE_SERVICE_URL + "/teams/add", headers: _header,
       body: jsonEncode(team.toJson()));
 
     if (response.statusCode == 200) {
-      print(response.body);
-      Iterable l = json.decode(response.body);
-      teams = List<Team>.from(l.map((model) => Team.fromJson(model)));
+      teams = Team.fromJson(jsonDecode(response.body));
     }
     return teams;
   }
@@ -332,5 +334,47 @@ class HttpUtil {
     }
     print(jsonEncode(matchSummary));
     return matchSummary;
+  }
+
+  static Future<MatchScoreCard> getMatchScoreCard(String matchId, String battingTeamId) async {
+    var header = _header;
+
+    MatchScoreCard scoreCard;
+
+    header.update("battingTeamId", (value) => battingTeamId, ifAbsent: () => battingTeamId);
+    final response = await http.get(
+        Constant.PROFILE_SERVICE_URL + "/matches/"+matchId,
+        headers: header
+    );
+
+    print("response");
+    print(response);
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      scoreCard = MatchScoreCard.fromJson(json.decode(response.body));
+      scoreCard.battingplayerScoreCard.forEach((key, value) {
+        value.name = key;
+        if(value.numberOfsixes == null)
+          value.numberOfsixes = 0;
+        if(value.numberOfFours == null)
+          value.numberOfFours = 0;
+        if(value.run == null)
+          value.run = 0;
+        if(value.ballsFaced == null)
+          value.ballsFaced = 0;
+      });
+
+      scoreCard.bowlingPlayerScoreCard.forEach((key, value) {
+        value.name = key;
+        if(value.wicket == null)
+          value.wicket = 0;
+        if(value.runsGiven == null)
+          value.runsGiven = 0;
+        if(value.extra == null)
+          value.extra = 0;
+      });
+    }
+    return scoreCard;
   }
 }

@@ -621,6 +621,7 @@ class _UpdateScore extends State<UpdateScore> {
       matchGame.currentPlayers.battingTeamPlayer
           .remove(currentBattingPlayer[onStrikeIndex].uuid);
       newBatsman.onStrike = true;
+      newBatsman.playedPosition = matchGame.currentPlayers.wickets + 1;
       currentBattingPlayer[onStrikeIndex] = newBatsman;
       matchGame.currentPlayers.battingTeamPlayer.putIfAbsent(
           newBatsman.uuid, () => currentBattingPlayer[onStrikeIndex]);

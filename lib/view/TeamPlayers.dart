@@ -33,6 +33,8 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
 
   bool _isLoadComplete = false;
 
+  Set<String> teamPlayerList = new Set();
+
   Map<String, Player> _selectedPlayers = new Map();
 
   Map<String, Player> _otherTeamselectedPlayers = new Map();
@@ -204,10 +206,19 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
                 color: Colors.white,
               ),
             ),
-            onPressed: () {
+            onPressed: () async{
               SharedPrefUtil.putObject(
                   team.teamName + "_" + Constant.SELECTED_PLAYERS,
                   _selectedPlayers);
+                team.playerList = [];
+              _selectedPlayers.forEach((key, value) {
+                if(!teamPlayerList.contains(key)){
+                  team.playerList.add(value);
+                }
+              });
+
+              Team team1 = await HttpUtil.addteam(team);
+              team.teamId = team1.teamId;
               updateTeamPlayer(_selectedPlayers.values.toList());
               Navigator.of(context).pop();
             },
@@ -378,6 +389,9 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
             return Loading();
           } else if (snapshot.hasData) {
             List<Player> players = snapshot.data;
+            players.forEach((element) {
+              teamPlayerList.add(element.uuid);
+            });
             if (players.length > 0) {
               return ListView.builder(
                   itemCount: players.length,
@@ -441,11 +455,11 @@ class _selectTeamPlayers extends State<SelectTeamPlayers> {
             }
             else {
               return Text(
-                  "No players in your City \nYou may want to search by Player Name");
+                  "No players in your Team \nYou may want to select from add players tab");
             }
           } else {
             return Text(
-                "No players in your City \nYou may want to search by Player Name");
+                "No players in your Team \nYou may want to select from add players tab");
           }
         });
   }

@@ -27,6 +27,8 @@ class _SelectTeams extends State<SelectTeam> {
 
   Team teamA;
   Team teamB;
+  City teamACity;
+  City teamBCity;
 
   MatchGame matchgame;
   
@@ -37,6 +39,8 @@ class _SelectTeams extends State<SelectTeam> {
     matchgame = MatchGame();
     teamA = Team();
     teamB = Team();
+    teamACity = new City();
+    teamBCity = new City();
   }
 
   @override
@@ -82,7 +86,7 @@ class _SelectTeams extends State<SelectTeam> {
 
                 Row(children: <Widget>[
                     Container(
-                      child: searchCity(this._typeFirstAheadCityController, 0.5 * _width, "Select City"),
+                      child: searchCity(this._typeFirstAheadCityController, 0.5 * _width, "Select City", true),
                     ),
                     Container(
                       child: addPlayersButton(teamA, true),
@@ -101,7 +105,7 @@ class _SelectTeams extends State<SelectTeam> {
 
                 Row(children: <Widget>[
                   Container(
-                    child: searchCity(this._typeSecondAheadCityController, 0.5 * _width, "Select City"),
+                    child: searchCity(this._typeSecondAheadCityController, 0.5 * _width, "Select City", false),
                   ),
                   Container(
                     child: addPlayersButton(teamB, false),
@@ -175,6 +179,21 @@ class _SelectTeams extends State<SelectTeam> {
           //     _isTeamFound = true;
           //   }
           // });
+
+          if(filteredTeams.isEmpty){
+            typeAheadTeamController.text = pattern;
+            setState(() {
+              if(isFirstTeam) {
+                teamA = new Team();
+                teamA.teamName = pattern;
+                typeAheadCity.text = _typeFirstAheadCityController.text;
+              }else
+                teamB = new Team();
+                teamB.teamName = pattern;
+                typeAheadCity.text = _typeSecondAheadCityController.text;
+            });
+          }
+
           return filteredTeams;
         },
         itemBuilder: (context, suggestion) {
@@ -242,6 +261,58 @@ class _SelectTeams extends State<SelectTeam> {
 
         ],
       ),
+    );
+  }
+
+
+
+  Widget searchCity(TextEditingController typeAheadCityController, double fieldwidth, String fieldPlaceHolder, bool isFirstTeam){
+    return Row(
+      children: [
+        Container(
+          width: fieldwidth,
+          padding: EdgeInsets.only(left: 20, right: 10),
+          child: TypeAheadFormField(
+            hideOnError: true,
+            // direction: AxisDirection.down,
+            suggestionsBoxVerticalOffset: -10.0,
+            autoFlipDirection: true,
+            hideOnLoading: true,
+            getImmediateSuggestions: false,
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: typeAheadCityController,
+              enabled: true,
+              decoration: InputDecoration(
+                labelText: fieldPlaceHolder,
+                //prefixIcon: Icon(Icons.search)
+              ),
+              style: TextStyle(fontFamily: "Lemonada",),
+            ),
+            suggestionsCallback: (pattern) async {
+              List<City> filteredCities = await searchCities(pattern);
+              return filteredCities;
+            },
+            itemBuilder: (context, suggestion) {
+              return ListTile(
+                leading: Icon(Icons.location_city, color: Constant.PRIMARY_COLOR,),
+                title: Text(suggestion.cityName +", "+ suggestion.state, style: TextStyle(fontFamily: "Lemonada",),),
+              );
+            },
+            transitionBuilder: (context, suggestionsBox, controller) {
+              return suggestionsBox;
+            },
+            onSuggestionSelected: (suggestion) {
+              if(isFirstTeam){
+                teamA.teamCity = suggestion;
+              }else{
+                teamB.teamCity = suggestion;
+              }
+              typeAheadCityController.text = suggestion.cityName + ", " + suggestion.state;
+            },
+          ),
+        ),
+
+      ],
     );
   }
 }

@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 
+import 'model/player.dart';
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await SharedPrefUtil().init();
-  SharedPrefUtil.remove("cities");
-//  SharedPrefUtil.clear();
+  Player profile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
+  SharedPrefUtil.clear();
+  SharedPrefUtil.putObject(Constant.PROFILE_KEY, profile);
   await SharedPrefUtil.fetchCities();
   runApp(MyApp());
 }

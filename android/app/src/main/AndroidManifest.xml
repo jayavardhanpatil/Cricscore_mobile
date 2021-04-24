@@ -2,7 +2,7 @@
     package="app.cpp.ms.cricscore">
    <application
         android:label="cricscore"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
        android:usesCleartextTraffic="true">
 
         <activity

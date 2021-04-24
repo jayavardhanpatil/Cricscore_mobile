@@ -19,10 +19,13 @@ MatchSummary _$MatchSummaryFromJson(Map<String, dynamic> json) {
     ..matchTitile = json['matchTitile'] as String
     ..live = json['live'] as bool
     ..firstBattingTeamName = json['firstBattingTeamName'] as String
-    ..secondInningsTramName = json['secondInningsTramName'] as String
+    ..secondInningsTeamName = json['secondInningsTeamName'] as String
     ..firstInningsOver = json['firstInningsOver'] as bool
     ..result = json['result'] as String
-    ..target = json['target'] as int;
+    ..target = json['target'] as int
+    ..firstBattingTeamId = json['firstBattingTeamId'] as int
+    ..secondBattingTeamId = json['secondBattingTeamId'] as int
+    ..matchId = json['matchId'] as int;
 }
 
 Map<String, dynamic> _$MatchSummaryToJson(MatchSummary instance) =>
@@ -32,8 +35,11 @@ Map<String, dynamic> _$MatchSummaryToJson(MatchSummary instance) =>
       'matchTitile': instance.matchTitile,
       'live': instance.live,
       'firstBattingTeamName': instance.firstBattingTeamName,
-      'secondInningsTramName': instance.secondInningsTramName,
+      'secondInningsTeamName': instance.secondInningsTeamName,
       'firstInningsOver': instance.firstInningsOver,
       'result': instance.result,
       'target': instance.target,
+      'firstBattingTeamId': instance.firstBattingTeamId,
+      'secondBattingTeamId': instance.secondBattingTeamId,
+      'matchId': instance.matchId,
     };

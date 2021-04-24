@@ -11,10 +11,13 @@ class MatchSummary{
   String matchTitile;
   bool live;
   String firstBattingTeamName;
-  String secondInningsTramName;
+  String secondInningsTeamName;
   bool firstInningsOver;
   String result;
   int target;
+  int firstBattingTeamId;
+  int secondBattingTeamId;
+  int matchId;
 
   MatchSummary(){}
 

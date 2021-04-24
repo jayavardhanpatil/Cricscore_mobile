@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
 import 'package:cricscore/controller/HTTPUtil.dart';
+import 'package:cricscore/controller/database_service.dart';
 import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/Innings.dart';
 import 'package:cricscore/model/MatchGame.dart';
@@ -198,6 +199,7 @@ class _SelectOpeners extends State<SelectOpeners>{
                       this.match.firstInning = initializeInning(batting, bowling);
                       this.match.secondInning = initializeInning(bowling, batting);
                     }else{
+                      this.match.secondInnignsStarted = true;
                       this.match.secondInning = initializeInning(batting, bowling);
                       //this.match.firstInning = initializeInning(bowling, batting);
                     }
@@ -212,6 +214,22 @@ class _SelectOpeners extends State<SelectOpeners>{
                         (this.match.firstInningsOver) ? Constant.INNINGS[1] : Constant.INNINGS[0]);
 
                     Navigator.pop(context);
+                    String matchTitle = match.teamA.teamName + "-" + match.teamB.teamName;
+                    Map<String, dynamic> updateGameSummaryData = {};
+                      if(!match.secondInnignsStarted){
+                        updateGameSummaryData = {
+                          "firstBattingTeamName" : batting.teamName,
+                          "secondInningsTeamName" : bowling.teamName,
+                          "matchTitile" : matchTitle,
+                          "firstInningsOver" : false,
+                          "live":true,
+                          "firstBattingTeamId": match.firstInning.battingteam.teamId,
+                          "secondBattingTeamId": match.firstInning.bowlingteam.teamId,
+                          "matchId":match.matchId,
+                          "firstInningsScore" : jsonDecode(jsonEncode(currentPlayer)),
+                        };
+                    }
+                      DatabaseService.updateInnings(updateGameSummaryData, match.matchVenue.cityId, matchTitle);
 
                     Navigator.push(context, MaterialPageRoute(builder: (context) =>
                     (UpdateScore(matchGame: match, batting: batting, bowling: bowling,))));
@@ -264,7 +282,6 @@ class _SelectOpeners extends State<SelectOpeners>{
     player.wicket = 0;
     player.numberOfsixes = 0;
     player.numberOfFours = 0;
-    player.playedPosition = 0;
     player.onStrike = false;
   }
 
