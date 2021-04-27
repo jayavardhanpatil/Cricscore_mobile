@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/controller/CustomDialog.dart';
 import 'package:cricscore/controller/HTTPUtil.dart';
+import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/controller/database_service.dart';
-import 'package:cricscore/model/Innings.dart';
 import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/Team.dart';
 import 'package:cricscore/model/player.dart';
@@ -779,6 +779,9 @@ class _UpdateScore extends State<UpdateScore> {
     if(isMatchOver){
       HttpUtil.postInnings(matchGame.secondInning, matchGame.matchId, Constant.INNINGS[1]);
       HttpUtil.updateMatchResult(matchGame.matchId, matchGame);
+      Player profile = SharedPrefUtil.getPlayerObject(Constant.PROFILE_KEY);
+      SharedPrefUtil.clear();
+      SharedPrefUtil.putObject(Constant.PROFILE_KEY, profile);
     }
     return isMatchOver;
   }

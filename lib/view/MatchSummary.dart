@@ -3,10 +3,8 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/Constants.dart';
-import 'package:cricscore/controller/HTTPUtil.dart';
 import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/controller/database_service.dart';
-import 'package:cricscore/model/City.dart';
 import 'package:cricscore/model/CurrentPlayer.dart';
 import 'package:cricscore/model/MatchGame.dart';
 import 'package:cricscore/model/MatchSummary.dart';
@@ -36,6 +34,8 @@ class _MatchSummary extends State<MatchSummaryPage>{
   Future matches;
   MatchGame game;
   bool loading = true;
+
+  static Map<String, Map<String, String>> match_Innings_Score = new Map();
   List<MatchSummary> _matches = [];
   List<Player> batsmansplayers;
   List<Player> bowler;
@@ -83,7 +83,7 @@ class _MatchSummary extends State<MatchSummaryPage>{
           }else if(snapshot.hasData){
             _matches = snapshot.data;
             _matches.forEach((element) {
-              print("Match 1");
+              match_Innings_Score.putIfAbsent(element.matchTitile, () => null);
             });
             if(_matches.length > 0) {
               return ListView.builder(
@@ -165,14 +165,22 @@ class _MatchSummary extends State<MatchSummaryPage>{
           //     firstInningsWickets = matchSummary.firstInningsScore.wickets;
           //   }
           // });
+
+          Map<String, String> liveScore = new Map();
           if(matchSummary.secondInningsScore == null){
+            liveScore.putIfAbsent("SECOND", () => "0-0");
             matchSummary.secondInningsScore = new CurrentPlaying();
             (matchSummary.secondInningsScore.overs == null) ? matchSummary.secondInningsScore.overs : 0.0;
             (matchSummary.secondInningsScore.run == null) ? matchSummary.secondInningsScore.run : 0;
             (matchSummary.secondInningsScore.wickets == null) ? matchSummary.secondInningsScore.wickets : 0;
             (matchSummary.secondInningsScore.extra == null )?matchSummary.secondInningsScore.extra : 0;
+          }else{
+            liveScore.putIfAbsent("SECOND", () => matchSummary.secondInningsScore.run.toString() +"-"+
+                matchSummary.secondInningsScore.wickets.toString());
           }
-
+          liveScore.putIfAbsent("FIRST", () => matchSummary.firstInningsScore.run.toString() +"-"+
+          matchSummary.firstInningsScore.wickets.toString());
+          SharedPrefUtil.putObject("LIVE-"+matchSummary.matchTitile, liveScore);
           CurrentPlaying currentScore = (matchSummary.firstInningsOver) ? matchSummary.secondInningsScore : matchSummary.firstInningsScore;
           batsmansplayers = currentScore.battingTeamPlayer.values.toList();
           bowler = currentScore.bowlingTeamPlayer.values.toList();

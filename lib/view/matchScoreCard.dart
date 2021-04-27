@@ -1,6 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cricscore/controller/HTTPUtil.dart';
+import 'package:cricscore/controller/SharedPrefUtil.dart';
 import 'package:cricscore/model/MatchSummary.dart';
 import 'package:cricscore/model/matchScoreCard.dart';
 import 'package:cricscore/model/player.dart';
@@ -27,7 +30,27 @@ class _MatchScoreCard extends State<MatchScoreCardView> {
   var _height;
   var _width;
 
+  Map<String, dynamic> liveScore;
+
   _MatchScoreCard(this.matchSummary);
+
+  String firstInningsScore = "0-0";
+  String secondInningsScore = "0-0";
+
+  @override
+  void initState(){
+  liveScore = SharedPrefUtil.getObject("LIVE-"+this.matchSummary.matchTitile);
+
+  if(liveScore != null){
+  liveScore.forEach((key, value) {
+    if(key == "FIRST"){
+      firstInningsScore = value;
+    }else{
+      secondInningsScore = value;
+    }
+  });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +65,7 @@ class _MatchScoreCard extends State<MatchScoreCardView> {
         .of(context)
         .size
         .width;
+
 
 
     //return (_isLoadComplete) ? Loading() : Scaffold(
@@ -80,8 +104,9 @@ class _MatchScoreCard extends State<MatchScoreCardView> {
                                   fontSize: 25, fontWeight: FontWeight.bold)
                           ),
                           Text(
-                              matchSummary.firstInningsScore.run.toString() + "-" +
-                                  matchSummary.firstInningsScore.wickets.toString(),
+                              firstInningsScore,
+                              // matchSummary.firstInningsScore.run.toString() + "-" +
+                              //     matchSummary.firstInningsScore.wickets.toString() :
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold)
                           ),
@@ -97,9 +122,10 @@ class _MatchScoreCard extends State<MatchScoreCardView> {
                               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)
                           ),
                           Text(
-                            (matchSummary.secondInningsScore == null) ? "0-0" :
-                              matchSummary.secondInningsScore.run.toString() + "-" +
-                                  matchSummary.secondInningsScore.wickets.toString(),
+                            secondInningsScore,
+                            // (matchSummary.secondInningsScore == null) ? "0-0" :
+                            //   matchSummary.secondInningsScore.run.toString() + "-" +
+                            //       matchSummary.secondInningsScore.wickets.toString(),
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold)
                           ),

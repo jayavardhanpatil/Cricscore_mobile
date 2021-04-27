@@ -159,6 +159,8 @@ class _StartMatch extends State<StartMatch>{
                 ),
               ),
 
+              SizedBox(height: 20,),
+
               RaisedButton(
                 color: Constant.PRIMARY_COLOR,
                 shape: RoundedRectangleBorder(
