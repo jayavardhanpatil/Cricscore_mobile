@@ -36,7 +36,7 @@ class DatabaseService {
     currentPlaying.overs = game.currentPlayers.overs;
     match.live = game.live;
     match.firstInningsOver = game.firstInningsOver;
-    match.matchTitile = game.teamA.teamName+"-"+game.teamB.teamName;
+    match.matchTitile = game.teamA.teamName+"-"+game.teamB.teamName+"-"+date;
 
     if(game.firstInningsOver && !game.secondInnignsStarted){
       updateInningsParameters = {
@@ -71,7 +71,7 @@ class DatabaseService {
 
   static Future updateInnings(Map<String, dynamic> match, int cityId, String matchTitle) async {
     return await _fireBaseRTreference.child("matches")
-        .child(cityId.toString()).child(matchTitle +"-"+date).update(match)
+        .child(cityId.toString()).child(matchTitle).update(match)
         .then((value) => print("Added match Detail"))
         .catchError((e){
       print("Error : in adding match details"+e.toString());
@@ -102,7 +102,7 @@ class DatabaseService {
   static Stream<MatchSummary> gameStreamData(String matchVenue, String matchTitle) {
     return _fireBaseRTreference.child("matches")
         .child(matchVenue)
-        .child(matchTitle+"-"+date)
+        .child(matchTitle)
         .onValue.map(_mapTOMatchGame);
   }
 

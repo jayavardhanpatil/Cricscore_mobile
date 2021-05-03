@@ -214,7 +214,7 @@ class _SelectOpeners extends State<SelectOpeners>{
                         (this.match.firstInningsOver) ? Constant.INNINGS[1] : Constant.INNINGS[0]);
 
                     Navigator.pop(context);
-                    String matchTitle = match.teamA.teamName + "-" + match.teamB.teamName;
+                    String matchTitle = match.teamA.teamName + "-" + match.teamB.teamName + "-" + DatabaseService.date;
                     Map<String, dynamic> updateGameSummaryData = {};
                       if(!match.secondInnignsStarted){
                         updateGameSummaryData = {
